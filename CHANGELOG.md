@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.2
+- Settings and statistics pages: "Reload AWStats data" below the status, buttons to switch between the two pages, post type checkboxes one per line.
+
 ## 1.0.1
 - Renamed to "AWStatium – Page Views from AWStats". Slug, shortcodes, functions and settings are unchanged.
 

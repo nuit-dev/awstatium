@@ -118,11 +118,19 @@ add_action('admin_enqueue_scripts', function ($hook) {
 
 /** POST form that reloads all AWStats data. */
 function awstatium_refresh_form($back) {
-    return '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" style="display:inline">'
+    return '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" style="margin:0">'
          . '<input type="hidden" name="action" value="awstatium_refresh">'
          . '<input type="hidden" name="back" value="' . esc_attr($back) . '">'
          . wp_nonce_field('awstatium_refresh', '_wpnonce', true, false)
          . '<button class="button">' . esc_html__('Reload AWStats data', 'awstatium') . '</button></form>';
+}
+
+/** Buttons below the status: reload the data and go to the other AWStatium page. */
+function awstatium_actions($page) {
+    $other = $page === 'settings'
+        ? '<a class="button" href="' . esc_url(admin_url('tools.php?page=awstatium')) . '">' . esc_html__('View statistics', 'awstatium') . '</a>'
+        : '<a class="button" href="' . esc_url(admin_url('options-general.php?page=awstatium-settings')) . '">' . esc_html__('Settings', 'awstatium') . '</a>';
+    return '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0">' . awstatium_refresh_form($page) . $other . '</div>';
 }
 
 function awstatium_settings_page() {
@@ -153,7 +161,7 @@ function awstatium_settings_page() {
     }
     $row(__('Months loaded', 'awstatium'), esc_html(number_format_i18n(count($data)))
         . (!$data && wp_next_scheduled('awstatium_refresh_now') ? ' – ' . esc_html__('Data is being loaded in the background. Reload this page in a minute.', 'awstatium') : ''));
-    $row(__('Last AWStats update', 'awstatium'), esc_html($last !== '' ? awstatium_dt($last) : '–') . ' ' . awstatium_refresh_form('settings'));
+    $row(__('Last AWStats update', 'awstatium'), esc_html($last !== '' ? awstatium_dt($last) : '–'));
     if (!awstatium_pretty_permalinks()) {
         $row(__('Permalinks', 'awstatium'), '<strong style="color:#b32d2e">' . esc_html__('Plain permalinks (?p=123) are in use. AWStats ignores query strings, so views per page cannot be counted. Choose another structure in Settings → Permalinks.', 'awstatium') . '</strong>');
     }
@@ -161,6 +169,7 @@ function awstatium_settings_page() {
         $row('open_basedir', '<code>' . esc_html(ini_get('open_basedir')) . '</code><br>' . esc_html__('PHP can only read these directories. If the AWStats directory is outside them, ask your host or copy the files to an allowed directory with a cron job.', 'awstatium'));
     }
     echo '</tbody></table>';
+    echo awstatium_actions('settings'); // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts
 
     echo '<form method="post" action="options.php">';
     settings_fields('awstatium');
@@ -207,8 +216,8 @@ function awstatium_settings_page() {
     // Automatic display
     echo '<tr><th scope="row">' . esc_html__('Show views automatically', 'awstatium') . '</th><td><fieldset>';
     foreach (awstatium_post_types() as $type => $obj) {
-        echo '<label style="margin-right:16px"><input type="checkbox" name="' . esc_attr($name) . '[auto_display][]" value="' . esc_attr($type) . '"'
-           . checked(in_array($type, (array) $s['auto_display'], true), true, false) . '> ' . esc_html($obj->labels->name) . '</label>';
+        echo '<label><input type="checkbox" name="' . esc_attr($name) . '[auto_display][]" value="' . esc_attr($type) . '"'
+           . checked(in_array($type, (array) $s['auto_display'], true), true, false) . '> ' . esc_html($obj->labels->name) . '</label><br>';
     }
     echo '<p><label>' . esc_html__('Position:', 'awstatium') . ' <select name="' . esc_attr($name) . '[position]">'
        . '<option value="after"' . selected($s['position'], 'after', false) . '>' . esc_html__('Below the content', 'awstatium') . '</option>'

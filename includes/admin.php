@@ -94,12 +94,12 @@ function awstatium_stats_page() {
     if (!$months) {
         echo '<p>' . esc_html__('No AWStats data yet.', 'awstatium') . ' ';
         if (wp_next_scheduled('awstatium_refresh_now')) echo esc_html__('Data is being loaded in the background. Reload this page in a minute.', 'awstatium') . ' ';
-        echo '<a href="' . esc_url(admin_url('options-general.php?page=awstatium-settings')) . '">' . esc_html__('Check the settings', 'awstatium') . '</a> '
-           . awstatium_refresh_form('stats') . '</p></div>'; // phpcs:ignore WordPress.Security.EscapeOutput -- form built from escaped parts
+        echo '</p>' . awstatium_actions('stats') . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts
         return;
     }
 
-    echo '<p>' . esc_html__('Last AWStats update:', 'awstatium') . ' <strong>' . esc_html(awstatium_dt($last)) . '</strong> ' . awstatium_refresh_form('stats') . '</p>';
+    echo '<p>' . esc_html__('Last AWStats update:', 'awstatium') . ' <strong>' . esc_html(awstatium_dt($last)) . '</strong></p>';
+    echo awstatium_actions('stats'); // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts
 
     // Views of one page (or section) by month
     $q         = isset($_GET['path']) ? trim(wp_strip_all_tags((string) wp_unslash($_GET['path']))) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- paths are sanitised by awstatium_input_path()

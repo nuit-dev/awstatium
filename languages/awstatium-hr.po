@@ -4,9 +4,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: AWStatium 1.0.1\n"
+"Project-Id-Version: AWStatium 1.0.2\n"
 "Report-Msgid-Bugs-To: https://github.com/nuit-dev/awstatium/issues\n"
-"POT-Creation-Date: 2026-09-27 22:55+0200\n"
+"POT-Creation-Date: 2026-09-27 23:55+0200\n"
 "PO-Revision-Date: 2026-09-27 21:30+0200\n"
 "Last-Translator: NUIT d.o.o.\n"
 "Language-Team: Croatian\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-#: awstatium.php:40 includes/data.php:619
+#: awstatium.php:40 includes/data.php:660
 msgid "AWStatium does not support WordPress Multisite yet."
 msgstr "AWStatium još ne podržava WordPress Multisite."
 
@@ -63,7 +63,7 @@ msgstr "Upravo je u tijeku drugo osvježavanje. Pokušajte ponovno za minutu."
 msgid "AWStatium has no AWStats data yet."
 msgstr "AWStatium još nema AWStats podataka."
 
-#: includes/admin.php:41 includes/admin.php:97 includes/admin.php:210
+#: includes/admin.php:41 includes/admin.php:210
 msgid "Check the settings"
 msgstr "Provjerite postavke"
 
@@ -79,11 +79,11 @@ msgstr "AWStatium statistika"
 msgid "No AWStats data yet."
 msgstr "Još nema AWStats podataka."
 
-#: includes/admin.php:96 includes/settings.php:155
+#: includes/admin.php:96 includes/settings.php:163
 msgid "Data is being loaded in the background. Reload this page in a minute."
 msgstr "Podaci se učitavaju u pozadini. Osvježite ovu stranicu za minutu."
 
-#: includes/admin.php:102
+#: includes/admin.php:101
 msgid "Last AWStats update:"
 msgstr "Zadnje osvježavanje AWStatsa:"
 
@@ -161,7 +161,10 @@ msgid ""
 "** Pages only: addresses ending with /, without a file extension or ending "
 "with .html, without admin, API and feeds. The same number the shortcodes "
 "show."
-msgstr "** Samo stranice: adrese koje završavaju s /, bez nastavka datoteke ili s nastavkom .html, bez admina, API-ja i feedova. Isti broj prikazuju shortcodeovi."
+msgstr ""
+"** Samo stranice: adrese koje završavaju s /, bez nastavka datoteke ili s "
+"nastavkom .html, bez admina, API-ja i feedova. Isti broj prikazuju "
+"shortcodeovi."
 
 #: includes/admin.php:156
 msgid ""
@@ -246,7 +249,7 @@ msgstr ""
 "selidbe. Stari slugovi objava dodaju se automatski."
 
 #. translators: %s: number of page views
-#: includes/data.php:709
+#: includes/data.php:750
 #, php-format
 msgid "%s view"
 msgid_plural "%s views"
@@ -255,7 +258,7 @@ msgstr[1] "%s pregleda"
 msgstr[2] "%s pregleda"
 
 #. translators: %s: number of downloads
-#: includes/data.php:714
+#: includes/data.php:755
 #, php-format
 msgid "%s download"
 msgid_plural "%s downloads"
@@ -263,7 +266,7 @@ msgstr[0] "%s preuzimanje"
 msgstr[1] "%s preuzimanja"
 msgstr[2] "%s preuzimanja"
 
-#: includes/settings.php:17 includes/settings.php:140
+#: includes/settings.php:17 includes/settings.php:148
 msgid "AWStatium settings"
 msgstr "AWStatium postavke"
 
@@ -314,9 +317,12 @@ msgid ""
 "The new data source could not be saved yet. The previous data is still shown "
 "and saving will be retried in a few minutes. Details are in the PHP error "
 "log."
-msgstr "Novi izvor podataka još nije spremljen. I dalje se prikazuju prijašnji podaci, a spremanje će se ponovno pokušati za nekoliko minuta. Detalji su u PHP error logu."
+msgstr ""
+"Novi izvor podataka još nije spremljen. I dalje se prikazuju prijašnji "
+"podaci, a spremanje će se ponovno pokušati za nekoliko minuta. Detalji su u "
+"PHP error logu."
 
-#: includes/settings.php:102
+#: includes/settings.php:102 includes/settings.php:132
 msgid "Settings"
 msgstr "Postavke"
 
@@ -324,39 +330,43 @@ msgstr "Postavke"
 msgid "Reload AWStats data"
 msgstr "Ponovno učitaj AWStats podatke"
 
-#: includes/settings.php:144
+#: includes/settings.php:131
+msgid "View statistics"
+msgstr "Prikaži statistiku"
+
+#: includes/settings.php:152
 msgid "Status"
 msgstr "Stanje"
 
-#: includes/settings.php:148
+#: includes/settings.php:156
 msgid "AWStats files found"
 msgstr "Pronađene AWStats datoteke"
 
-#: includes/settings.php:150
+#: includes/settings.php:158
 msgid "None – check the directory and config below."
 msgstr "Nijedna – provjerite mapu i konfiguraciju ispod."
 
-#: includes/settings.php:152
+#: includes/settings.php:160
 msgid "Shown data"
 msgstr "Prikazani podaci"
 
-#: includes/settings.php:152
+#: includes/settings.php:160
 msgid "The data of the previous source is shown until the new one is loaded."
 msgstr "Prikazuju se podaci prijašnjeg izvora dok se novi ne učita."
 
-#: includes/settings.php:154
+#: includes/settings.php:162
 msgid "Months loaded"
 msgstr "Učitani mjeseci"
 
-#: includes/settings.php:156
+#: includes/settings.php:164
 msgid "Last AWStats update"
 msgstr "Zadnje osvježavanje AWStatsa"
 
-#: includes/settings.php:158
+#: includes/settings.php:166
 msgid "Permalinks"
 msgstr "Stalne veze"
 
-#: includes/settings.php:158
+#: includes/settings.php:166
 msgid ""
 "Plain permalinks (?p=123) are in use. AWStats ignores query strings, so "
 "views per page cannot be counted. Choose another structure in Settings → "
@@ -366,7 +376,7 @@ msgstr ""
 "adresi, pa se pregledi po stranici ne mogu brojati. Odaberite drugu "
 "strukturu u Postavke → Stalne veze."
 
-#: includes/settings.php:161
+#: includes/settings.php:169
 msgid ""
 "PHP can only read these directories. If the AWStats directory is outside "
 "them, ask your host or copy the files to an allowed directory with a cron "
@@ -375,11 +385,11 @@ msgstr ""
 "PHP smije čitati samo ove mape. Ako je AWStats mapa izvan njih, obratite se "
 "hostingu ili cron zadatkom kopirajte datoteke u dopuštenu mapu."
 
-#: includes/settings.php:171
+#: includes/settings.php:180
 msgid "AWStats data directory"
 msgstr "Mapa s AWStats podacima"
 
-#: includes/settings.php:173
+#: includes/settings.php:182
 msgid ""
 "Directory with files named awstatsMMYYYY.example.com.txt. On cPanel this is "
 "usually ~/tmp/awstats/ssl (HTTPS) or ~/tmp/awstats (HTTP)."
@@ -387,19 +397,19 @@ msgstr ""
 "Mapa s datotekama imena awstatsMMYYYY.primjer.hr.txt. Na cPanelu je to "
 "obično ~/tmp/awstats/ssl (HTTPS) ili ~/tmp/awstats (HTTP)."
 
-#: includes/settings.php:180
+#: includes/settings.php:189
 msgid "Found on this server:"
 msgstr "Pronađeno na ovom poslužitelju:"
 
-#: includes/settings.php:184 includes/settings.php:201
+#: includes/settings.php:193 includes/settings.php:210
 msgid "Use"
 msgstr "Koristi"
 
-#: includes/settings.php:191
+#: includes/settings.php:200
 msgid "AWStats config"
 msgstr "AWStats konfiguracija"
 
-#: includes/settings.php:193
+#: includes/settings.php:202
 msgid ""
 "The middle part of the file names, usually your domain. Addon domains on "
 "cPanel look like example.com.maindomain.com."
@@ -407,12 +417,12 @@ msgstr ""
 "Srednji dio imena datoteka, obično vaša domena. Dodatne domene na cPanelu "
 "izgledaju ovako: primjer.hr.glavnadomena.hr."
 
-#: includes/settings.php:196
+#: includes/settings.php:205
 msgid "In this directory:"
 msgstr "U ovoj mapi:"
 
 #. translators: %s: number of monthly files
-#: includes/settings.php:199
+#: includes/settings.php:208
 #, php-format
 msgid "%s month"
 msgid_plural "%s months"
@@ -420,23 +430,23 @@ msgstr[0] "%s mjesec"
 msgstr[1] "%s mjeseca"
 msgstr[2] "%s mjeseci"
 
-#: includes/settings.php:208
+#: includes/settings.php:217
 msgid "Show views automatically"
 msgstr "Automatski prikaži preglede"
 
-#: includes/settings.php:213
+#: includes/settings.php:222
 msgid "Position:"
 msgstr "Položaj:"
 
-#: includes/settings.php:214
+#: includes/settings.php:223
 msgid "Below the content"
 msgstr "Ispod sadržaja"
 
-#: includes/settings.php:215
+#: includes/settings.php:224
 msgid "Above the content"
 msgstr "Iznad sadržaja"
 
-#: includes/settings.php:217
+#: includes/settings.php:226
 msgid ""
 "Adds e.g. \"1,234 views\" to single posts of the selected types. It is "
 "hidden while the count is 0. You can also use the [awstatium_views] "
@@ -446,24 +456,24 @@ msgstr ""
 "prikazuje se dok je broj 0. Možete koristiti i shortcode [awstatium_views] "
 "ili awstatium_get_views() u temi."
 
-#: includes/settings.php:221
+#: includes/settings.php:230
 msgid "Admin lists"
 msgstr "Popisi u adminu"
 
-#: includes/settings.php:222
+#: includes/settings.php:231
 msgid "Show a sortable Views column in the lists of posts and pages"
 msgstr ""
 "Prikaži stupac Pregledi s mogućnošću sortiranja u popisima objava i stranica"
 
-#: includes/settings.php:225
+#: includes/settings.php:234
 msgid "Page cache"
 msgstr "Predmemorija stranica"
 
-#: includes/settings.php:226
+#: includes/settings.php:235
 msgid "Purge the page cache when new AWStats data arrives"
 msgstr "Očisti predmemoriju stranica kad stignu novi AWStats podaci"
 
-#: includes/settings.php:227
+#: includes/settings.php:236
 msgid ""
 "Supports LiteSpeed Cache, WP Rocket, W3 Total Cache, WP Super Cache, Cache "
 "Enabler and SiteGround Speed Optimizer. Other plugins can use the "

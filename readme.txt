@@ -4,7 +4,7 @@ Tags: awstats, statistics, page views, downloads, privacy
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -91,6 +91,9 @@ cPanel keeps HTTPS traffic in `~/tmp/awstats/ssl` and HTTP traffic in `~/tmp/aws
 Everything AWStatium stored is removed. AWStats files are never modified.
 
 == Changelog ==
+
+= 1.0.2 =
+* Settings and statistics pages: "Reload AWStats data" below the status, buttons to switch between the two pages, post type checkboxes one per line.
 
 = 1.0.1 =
 * Renamed to "AWStatium – Page Views from AWStats". Slug, shortcodes, functions and settings are unchanged.

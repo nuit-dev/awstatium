@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.4
+- Drafts, pending and scheduled items no longer show the home page views: their temporary ?p= / ?page_id= address has no views of its own. The Views column stores counts for items of every status, so sorting is correct in lists with drafts and private items.
+
 ## 1.0.3
 - Sorting by the Views column: items without a stored count sort as 0 instead of by an unrelated value, the stored count is corrected while the list is shown, and "Reload AWStats data" always resyncs the column.
 

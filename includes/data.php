@@ -593,7 +593,7 @@ function awstatium_publish_source(array $s, $months = null) {
 
 /* ---------- Admin column sync (batched) ---------- */
 
-/** Starts (or restarts) storing each published item's view count as post meta, so the admin list can sort by it. */
+/** Starts (or restarts) storing each item's view count as post meta, so the admin list can sort by it. All statuses are included, because the list shows them all. */
 function awstatium_schedule_sync() {
     if (!awstatium_settings()['column']) return;
     $gen = (string) wp_rand(1, PHP_INT_MAX);
@@ -605,7 +605,7 @@ function awstatium_schedule_sync() {
 function awstatium_sync_batch($gen = '') {
     $state = get_option(AWSTATIUM_OPT_SYNC);
     if (!is_array($state) || (string) $state['gen'] !== (string) $gen) return; // superseded by a newer sync
-    $posts = get_posts(['post_type' => array_keys(awstatium_post_types()), 'post_status' => 'publish',
+    $posts = get_posts(['post_type' => array_keys(awstatium_post_types()), 'post_status' => 'any',
                         'posts_per_page' => AWSTATIUM_SYNC_BATCH, 'offset' => (int) $state['offset'],
                         'orderby' => 'ID', 'order' => 'ASC', 'no_found_rows' => true]);
     foreach ($posts as $post) update_post_meta($post->ID, AWSTATIUM_META_VIEWS, awstatium_get_views($post));
@@ -686,6 +686,10 @@ function awstatium_post_paths($post = null) {
     if (!$post || !awstatium_pretty_permalinks()) return [];
     $url = get_permalink($post);
     if (!$url) return [];
+    // Drafts, pending and scheduled items have no real address yet, only a fallback like ?p=123, ?page_id=123
+    // or ?post_type=x&p=123. AWStats drops the query string, so its path would be the home page's.
+    parse_str((string) wp_parse_url($url, PHP_URL_QUERY), $q);
+    if (isset($q['p']) || isset($q['page_id']) || isset($q['attachment_id'])) return [];
     $path  = (string) wp_parse_url($url, PHP_URL_PATH);
     $paths = [$path];
     // Old slugs (WordPress keeps them for non-hierarchical types when a slug changes). The slug is replaced

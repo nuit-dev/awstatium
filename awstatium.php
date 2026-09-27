@@ -3,7 +3,7 @@
  * Plugin Name:       AWStatium – Page Views from AWStats
  * Plugin URI:        https://github.com/nuit-dev/awstatium
  * Description:       Page views, downloads and traffic statistics from your server's AWStats data. No tracking scripts, no cookies.
- * Version:           1.0.3
+ * Version:           1.0.4
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            NUIT d.o.o.
@@ -17,7 +17,7 @@
 
 defined('ABSPATH') || exit;
 
-define('AWSTATIUM_VERSION', '1.0.3');
+define('AWSTATIUM_VERSION', '1.0.4');
 define('AWSTATIUM_FILE', __FILE__);
 define('AWSTATIUM_DIR', plugin_dir_path(__FILE__));
 

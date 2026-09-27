@@ -260,7 +260,7 @@ add_action('admin_init', function () {
             if ($col !== 'awstatium_views') return;
             $n = awstatium_get_views($id);
             // Keep the stored count used for sorting in step with the number shown (post meta is already cached for the list)
-            if (get_post_status($id) === 'publish' && (string) get_post_meta($id, AWSTATIUM_META_VIEWS, true) !== (string) $n) {
+            if ((string) get_post_meta($id, AWSTATIUM_META_VIEWS, true) !== (string) $n) {
                 update_post_meta($id, AWSTATIUM_META_VIEWS, $n);
             }
             echo $n > 0 ? esc_html(number_format_i18n($n)) : '–';
@@ -296,7 +296,7 @@ add_action('add_meta_boxes', function () {
 
 function awstatium_meta_box($post) {
     wp_nonce_field('awstatium_meta', 'awstatium_meta_nonce');
-    if ($post->post_status === 'publish') {
+    if (in_array($post->post_status, ['publish', 'private'], true)) {
         echo '<p><strong>' . esc_html(awstatium_format_views(awstatium_get_views($post))) . '</strong></p>';
     }
     echo '<p><label for="awstatium-old-paths">' . esc_html__('Previous URLs', 'awstatium') . '</label></p>'
@@ -316,5 +316,5 @@ add_action('save_post', function ($post_id) {
     else delete_post_meta($post_id, AWSTATIUM_META_OLD);
 
     // Keep the sortable column in step right away
-    if (get_post_status($post_id) === 'publish') update_post_meta($post_id, AWSTATIUM_META_VIEWS, awstatium_get_views($post_id));
+    update_post_meta($post_id, AWSTATIUM_META_VIEWS, awstatium_get_views($post_id));
 });

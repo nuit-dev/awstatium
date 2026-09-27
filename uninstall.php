@@ -1,6 +1,6 @@
 <?php
 /**
- * Removes everything Awstatium stored when the plugin is deleted. AWStats files are never touched.
+ * Removes everything AWStatium stored when the plugin is deleted. AWStats files are never touched.
  */
 
 defined('WP_UNINSTALL_PLUGIN') || exit;

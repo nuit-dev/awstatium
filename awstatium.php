@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name:       Awstatium
+ * Plugin Name:       AWStatium – Page Views from AWStats
  * Plugin URI:        https://github.com/nuit-dev/awstatium
  * Description:       Page views, downloads and traffic statistics from your server's AWStats data. No tracking scripts, no cookies.
  * Version:           1.0.0
@@ -37,7 +37,7 @@ register_deactivation_hook(__FILE__, function () {
 if (is_multisite()) {
     add_action('admin_notices', function () {
         if (current_user_can('activate_plugins')) {
-            echo '<div class="notice notice-error"><p>' . esc_html__('Awstatium does not support WordPress Multisite yet.', 'awstatium') . '</p></div>';
+            echo '<div class="notice notice-error"><p>' . esc_html__('AWStatium does not support WordPress Multisite yet.', 'awstatium') . '</p></div>';
         }
     });
     return;

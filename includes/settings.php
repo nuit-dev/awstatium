@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings → Awstatium: data source, automatic display and cache purging.
+ * Settings → AWStatium: data source, automatic display and cache purging.
  */
 
 defined('ABSPATH') || exit;
@@ -14,7 +14,7 @@ add_action('admin_init', function () {
 });
 
 add_action('admin_menu', function () {
-    add_options_page(__('Awstatium settings', 'awstatium'), 'Awstatium', 'manage_options', 'awstatium-settings', 'awstatium_settings_page');
+    add_options_page(__('AWStatium settings', 'awstatium'), 'AWStatium', 'manage_options', 'awstatium-settings', 'awstatium_settings_page');
 });
 
 function awstatium_sanitize_settings($in) {
@@ -137,7 +137,7 @@ function awstatium_settings_page() {
         if ($lu > $last) $last = $lu;
     }
 
-    echo '<div class="wrap"><h1>' . esc_html__('Awstatium settings', 'awstatium') . '</h1>';
+    echo '<div class="wrap"><h1>' . esc_html__('AWStatium settings', 'awstatium') . '</h1>';
     awstatium_refresh_notice();
 
     // Status

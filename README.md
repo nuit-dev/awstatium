@@ -1,12 +1,12 @@
-# Awstatium
+# AWStatium – Page Views from AWStats
 
 **Page views, downloads and traffic statistics for WordPress from your server's AWStats data. No tracking scripts, no cookies.**
 
-Most hosting control panels (cPanel, DirectAdmin) already run [AWStats](https://www.awstats.org/), which builds statistics from the web server's access logs. Awstatium reads that data and brings it into WordPress.
+Most hosting control panels (cPanel, DirectAdmin) already run [AWStats](https://www.awstats.org/), which builds statistics from the web server's access logs. AWStatium reads that data and brings it into WordPress.
 
 - **View counts per post and page**: automatically below posts, with a shortcode or from your theme
 - **Download counts** for PDFs and other files
-- **Statistics page** (Tools → Awstatium): visits, unique visitors, page views, hits and bandwidth by month and by day, most viewed pages, downloads
+- **Statistics page** (Tools → AWStatium): visits, unique visitors, page views, hits and bandwidth by month and by day, most viewed pages, downloads
 - **Dashboard widget**: this month compared to the last one, most viewed pages
 - **Sortable "Views" column** in the posts and pages lists
 - **Previous URLs**: moved or renamed a page? Add its old addresses and their views are counted too. Old post slugs are added automatically.
@@ -16,7 +16,7 @@ Nothing is added to your pages for counting: no JavaScript, no cookies, no datab
 ## Requirements
 
 - WordPress 6.0+, PHP 7.4+
-- AWStats data on the same server, readable by PHP. Typical for cPanel (`~/tmp/awstats/ssl`, `~/tmp/awstats`) and DirectAdmin; Awstatium finds these automatically.
+- AWStats data on the same server, readable by PHP. Typical for cPanel (`~/tmp/awstats/ssl`, `~/tmp/awstats`) and DirectAdmin; AWStatium finds these automatically.
 - Pretty permalinks
 - A single site: WordPress Multisite is not supported yet, the plugin refuses to activate on a network
 
@@ -27,14 +27,14 @@ It does not work on hosts without AWStats or where PHP cannot read its data, whi
 - A page is an address that ends with a slash, has no file extension, or ends with `.html`/`.htm`. This covers the usual permalink structures; other extensions (e.g. `.php`) are treated as files.
 - `/about` and `/about/` count as the same page. Paths are case-sensitive, as recorded by AWStats.
 - Percent-encoding is normalised (RFC 3986, 6.2.2): letters, digits and UTF-8 characters are compared decoded, reserved characters such as `%2F`, `%3F` or `%25` stay encoded, so they keep their meaning. The normalised form is stable, so stored keys can be normalised again without change.
-- Query strings are ignored. AWStats leaves them out by default (`URLWithQuery=0`) and Awstatium drops them even when AWStats keeps them, so plain `?p=123` permalinks are not supported.
+- Query strings are ignored. AWStats leaves them out by default (`URLWithQuery=0`) and AWStatium drops them even when AWStats keeps them, so plain `?p=123` permalinks are not supported.
 - Paths in shortcodes and "Previous URLs" are relative to the domain root, e.g. `/blog/about/` when WordPress runs in `/blog`.
 - When WordPress files live in their own directory (e.g. `/wordpress` with the site at `/`), views of `/wordpress/about/` are added to `/about/`.
 
 ## Installation
 
 1. Download the ZIP from [Releases](https://github.com/nuit-dev/awstatium/releases) and upload it in Plugins → Add New → Upload Plugin.
-2. Activate. Settings → Awstatium shows what was detected; pick another directory there if needed.
+2. Activate. Settings → AWStatium shows what was detected; pick another directory there if needed.
 3. Choose where to show view counts, or use the shortcodes.
 
 ## Shortcodes
@@ -70,7 +70,7 @@ Other cache plugins can hook into `awstatium_purge_cache`, which fires when the 
 
 ## How it works
 
-AWStats usually updates its data once a day. Awstatium checks for new data every hour, parses only the files that changed, stores the monthly numbers in the database and purges the page cache when counts change. Visitors only read the stored numbers; AWStats files are never parsed during a page view.
+AWStats usually updates its data once a day. AWStatium checks for new data every hour, parses only the files that changed, stores the monthly numbers in the database and purges the page cache when counts change. Visitors only read the stored numbers; AWStats files are never parsed during a page view.
 
 - A broken or half-written AWStats file never replaces good data: the previous numbers for that month are kept and the problem is logged.
 - A new data source (directory or config) is read and checked before it is accepted; a typo keeps the previous settings and numbers.
@@ -80,7 +80,7 @@ AWStats usually updates its data once a day. Awstatium checks for new data every
 
 ## Privacy
 
-Awstatium stores only aggregated numbers per URL and per file name. It does not read the AWStats visitor list (IP addresses), sets no cookies and adds nothing to your pages for counting.
+AWStatium stores only aggregated numbers per URL and per file name. It does not read the AWStats visitor list (IP addresses), sets no cookies and adds nothing to your pages for counting.
 
 ## Updates
 

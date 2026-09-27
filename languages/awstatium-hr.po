@@ -1,10 +1,10 @@
-# Awstatium
+# AWStatium
 # Copyright (C) 2026 NUIT d.o.o.
 # This file is distributed under the GPL-2.0-or-later license.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Awstatium 1.0.0\n"
+"Project-Id-Version: AWStatium 1.0.0\n"
 "Report-Msgid-Bugs-To: https://github.com/nuit-dev/awstatium/issues\n"
 "POT-Creation-Date: 2026-09-27 22:55+0200\n"
 "PO-Revision-Date: 2026-09-27 21:30+0200\n"
@@ -18,8 +18,8 @@ msgstr ""
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 #: awstatium.php:40 includes/data.php:619
-msgid "Awstatium does not support WordPress Multisite yet."
-msgstr "Awstatium još ne podržava WordPress Multisite."
+msgid "AWStatium does not support WordPress Multisite yet."
+msgstr "AWStatium još ne podržava WordPress Multisite."
 
 #: includes/admin.php:12
 msgid "Invalid request."
@@ -60,8 +60,8 @@ msgid "Another refresh is running. Try again in a minute."
 msgstr "Upravo je u tijeku drugo osvježavanje. Pokušajte ponovno za minutu."
 
 #: includes/admin.php:40
-msgid "Awstatium has no AWStats data yet."
-msgstr "Awstatium još nema AWStats podataka."
+msgid "AWStatium has no AWStats data yet."
+msgstr "AWStatium još nema AWStats podataka."
 
 #: includes/admin.php:41 includes/admin.php:97 includes/admin.php:210
 msgid "Check the settings"
@@ -72,8 +72,8 @@ msgid "Home page"
 msgstr "Naslovnica"
 
 #: includes/admin.php:75 includes/admin.php:91
-msgid "Awstatium statistics"
-msgstr "Awstatium statistika"
+msgid "AWStatium statistics"
+msgstr "AWStatium statistika"
 
 #: includes/admin.php:95 includes/admin.php:210
 msgid "No AWStats data yet."
@@ -264,8 +264,8 @@ msgstr[1] "%s preuzimanja"
 msgstr[2] "%s preuzimanja"
 
 #: includes/settings.php:17 includes/settings.php:140
-msgid "Awstatium settings"
-msgstr "Awstatium postavke"
+msgid "AWStatium settings"
+msgstr "AWStatium postavke"
 
 #: includes/settings.php:42
 msgid ""

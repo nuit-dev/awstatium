@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin: statistics page (Tools → Awstatium), manual refresh, dashboard widget,
+ * Admin: statistics page (Tools → AWStatium), manual refresh, dashboard widget,
  * sortable "Views" column and the "Previous URLs" box in the editor.
  */
 
@@ -37,7 +37,7 @@ add_action('admin_notices', function () {
     $screen = get_current_screen();
     if (!$screen || !in_array($screen->id, ['dashboard', 'plugins'], true) || !current_user_can('manage_options')) return;
     if (awstatium_files()) return;
-    echo '<div class="notice notice-warning"><p>' . esc_html__('Awstatium has no AWStats data yet.', 'awstatium')
+    echo '<div class="notice notice-warning"><p>' . esc_html__('AWStatium has no AWStats data yet.', 'awstatium')
        . ' <a href="' . esc_url(admin_url('options-general.php?page=awstatium-settings')) . '">' . esc_html__('Check the settings', 'awstatium') . '</a></p></div>';
 });
 
@@ -69,10 +69,10 @@ function awstatium_months() {
     return $months;
 }
 
-/* ---------- Tools → Awstatium ---------- */
+/* ---------- Tools → AWStatium ---------- */
 
 add_action('admin_menu', function () {
-    add_management_page(__('Awstatium statistics', 'awstatium'), 'Awstatium', 'manage_options', 'awstatium', 'awstatium_stats_page');
+    add_management_page(__('AWStatium statistics', 'awstatium'), 'AWStatium', 'manage_options', 'awstatium', 'awstatium_stats_page');
 });
 
 function awstatium_stats_page() {
@@ -88,7 +88,7 @@ function awstatium_stats_page() {
         if ($lu > $last) $last = $lu;
     }
 
-    echo '<div class="wrap"><h1>' . esc_html__('Awstatium statistics', 'awstatium') . '</h1>';
+    echo '<div class="wrap"><h1>' . esc_html__('AWStatium statistics', 'awstatium') . '</h1>';
     awstatium_refresh_notice();
 
     if (!$months) {
@@ -200,7 +200,7 @@ function awstatium_stats_page() {
 
 add_action('wp_dashboard_setup', function () {
     if (!current_user_can('manage_options')) return;
-    wp_add_dashboard_widget('awstatium_dashboard', 'Awstatium', 'awstatium_dashboard_widget');
+    wp_add_dashboard_widget('awstatium_dashboard', 'AWStatium', 'awstatium_dashboard_widget');
 });
 
 function awstatium_dashboard_widget() {
@@ -286,7 +286,7 @@ add_action('admin_head-edit.php', function () {
 /* ---------- "Previous URLs" box in the editor ---------- */
 
 add_action('add_meta_boxes', function () {
-    add_meta_box('awstatium', 'Awstatium', 'awstatium_meta_box', array_keys(awstatium_post_types()), 'side', 'low');
+    add_meta_box('awstatium', 'AWStatium', 'awstatium_meta_box', array_keys(awstatium_post_types()), 'side', 'low');
 });
 
 function awstatium_meta_box($post) {

@@ -388,12 +388,12 @@ function awstatium_parse_source(array $s, array $months, $force) {
         // The file changed while we were reading it: skip it until the next run
         if (@filemtime($file) !== $m) {
             $bad++;
-            error_log('Awstatium: ' . $k . ' changed while reading, skipped until the next run');
+            error_log('AWStatium: ' . $k . ' changed while reading, skipped until the next run');
             continue;
         }
         if (!$r) {
             $bad++;
-            error_log('Awstatium: ' . $k . ' is not a complete AWStats data file, keeping the previous data for that month');
+            error_log('AWStatium: ' . $k . ' is not a complete AWStats data file, keeping the previous data for that month');
             continue;
         }
         $new = $r + ['m' => $m, 'ym' => $mm[2] . $mm[1]];
@@ -467,7 +467,7 @@ function awstatium_sum(array $months, $src) {
 function awstatium_save($key, $value) {
     global $wpdb;
     if (update_option($key, $value, false) || get_option($key) === $value) return true;
-    error_log('Awstatium: saving ' . $key . ' failed: ' . $wpdb->last_error);
+    error_log('AWStatium: saving ' . $key . ' failed: ' . $wpdb->last_error);
     return false;
 }
 
@@ -657,7 +657,7 @@ add_action('init', function () {
 function awstatium_activate() {
     if (is_multisite()) {
         deactivate_plugins(plugin_basename(AWSTATIUM_FILE));
-        wp_die(esc_html__('Awstatium does not support WordPress Multisite yet.', 'awstatium'));
+        wp_die(esc_html__('AWStatium does not support WordPress Multisite yet.', 'awstatium'));
     }
     $s = awstatium_settings();
     if ($s['dir'] === '' || $s['config'] === '') {

@@ -1,4 +1,4 @@
-=== Awstatium ===
+=== AWStatium – Page Views from AWStats ===
 Contributors: kibergospodar
 Tags: awstats, statistics, page views, downloads, privacy
 Requires at least: 6.0
@@ -12,11 +12,11 @@ Page views, downloads and traffic statistics from your server's AWStats data. No
 
 == Description ==
 
-Most hosting control panels (cPanel, DirectAdmin) already run AWStats, which builds statistics from the web server's access logs. Awstatium reads that data and brings it into WordPress:
+Most hosting control panels (cPanel, DirectAdmin) already run AWStats, which builds statistics from the web server's access logs. AWStatium reads that data and brings it into WordPress:
 
 * **View counts per post and page** – show them automatically below posts, with a shortcode or from your theme.
 * **Download counts** for PDFs and other files.
-* **Statistics page** (Tools → Awstatium) with visits, unique visitors, page views, hits and bandwidth by month and by day, the most viewed pages and downloads.
+* **Statistics page** (Tools → AWStatium) with visits, unique visitors, page views, hits and bandwidth by month and by day, the most viewed pages and downloads.
 * **Dashboard widget** with this month compared to the last one and the most viewed pages.
 * **Sortable "Views" column** in the posts and pages lists.
 * **Previous URLs** – moved or renamed a page? Add its old addresses and their views are counted too. Old post slugs are added automatically.
@@ -25,7 +25,7 @@ Nothing is added to your pages for counting: no JavaScript, no cookies, no datab
 
 = How it works =
 
-AWStats usually updates its data once a day. Awstatium checks for new data every hour, stores the monthly numbers in the database and purges the page cache when the counts change (LiteSpeed Cache, WP Rocket, W3 Total Cache, WP Super Cache, Cache Enabler and SiteGround Speed Optimizer are supported). Visitors only ever read the stored numbers, AWStats files are never parsed during a page view.
+AWStats usually updates its data once a day. AWStatium checks for new data every hour, stores the monthly numbers in the database and purges the page cache when the counts change (LiteSpeed Cache, WP Rocket, W3 Total Cache, WP Super Cache, Cache Enabler and SiteGround Speed Optimizer are supported). Visitors only ever read the stored numbers, AWStats files are never parsed during a page view.
 
 Counts are based on what AWStats records: every page load of a URL, including reloads, without known bots.
 
@@ -34,12 +34,12 @@ Counts are based on what AWStats records: every page load of a URL, including re
 * A page is an address that ends with a slash, has no file extension, or ends with .html/.htm. This covers the usual permalink structures; other extensions (e.g. .php) are treated as files, not pages.
 * `/about` and `/about/` count as the same page. Paths are case-sensitive, as recorded by AWStats.
 * Percent-encoding is normalised (RFC 3986): letters, digits and UTF-8 characters are compared decoded, reserved characters such as `%2F`, `%3F` or `%25` stay encoded, so they keep their meaning.
-* Query strings are ignored. AWStats leaves them out by default (`URLWithQuery=0`), and Awstatium drops them even when AWStats keeps them. Plain `?p=123` permalinks are therefore not supported.
+* Query strings are ignored. AWStats leaves them out by default (`URLWithQuery=0`), and AWStatium drops them even when AWStats keeps them. Plain `?p=123` permalinks are therefore not supported.
 * Paths in shortcodes and "Previous URLs" are relative to the domain root, e.g. `/blog/about/` when WordPress runs in `/blog`.
 
 = Requirements =
 
-* AWStats data on the same server, readable by PHP. This is typical for cPanel (`~/tmp/awstats/ssl`, `~/tmp/awstats`) and DirectAdmin. Awstatium finds these directories automatically.
+* AWStats data on the same server, readable by PHP. This is typical for cPanel (`~/tmp/awstats/ssl`, `~/tmp/awstats`) and DirectAdmin. AWStatium finds these directories automatically.
 * Pretty permalinks.
 * A single site. WordPress Multisite is not supported yet and the plugin refuses to activate on a network.
 
@@ -47,12 +47,12 @@ It will not work on hosts that do not run AWStats or keep its data out of reach 
 
 = Privacy =
 
-Awstatium stores only aggregated numbers per URL and per file name. It does not read the visitor list of AWStats (IP addresses), sets no cookies and adds nothing to your pages for counting.
+AWStatium stores only aggregated numbers per URL and per file name. It does not read the visitor list of AWStats (IP addresses), sets no cookies and adds nothing to your pages for counting.
 
 == Installation ==
 
 1. Install and activate the plugin.
-2. Open Settings → Awstatium. The AWStats directory and config are usually detected automatically. If not, pick one of the directories found on the server or enter the path.
+2. Open Settings → AWStatium. The AWStats directory and config are usually detected automatically. If not, pick one of the directories found on the server or enter the path.
 3. Choose where to show view counts, or use the shortcodes below.
 
 == Frequently Asked Questions ==
@@ -76,7 +76,7 @@ JavaScript counters usually count a visitor once per day or session and skip vis
 
 = Why is "AWStats pages" so much higher than "Page views"? =
 
-AWStats counts every file type that its config does not list as a non-page, often including images, fonts and admin-ajax.php. Awstatium's page views only include pages (addresses ending with a slash, without a file extension or ending with .html), without admin, API and feed URLs.
+AWStats counts every file type that its config does not list as a non-page, often including images, fonts and admin-ajax.php. AWStatium's page views only include pages (addresses ending with a slash, without a file extension or ending with .html), without admin, API and feed URLs.
 
 = What happens if I enter a wrong directory or config? =
 
@@ -88,7 +88,7 @@ cPanel keeps HTTPS traffic in `~/tmp/awstats/ssl` and HTTP traffic in `~/tmp/aws
 
 = What happens to the data when I delete the plugin? =
 
-Everything Awstatium stored is removed. AWStats files are never modified.
+Everything AWStatium stored is removed. AWStats files are never modified.
 
 == Changelog ==
 

@@ -4,7 +4,7 @@ Tags: awstats, statistics, page views, downloads, privacy
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -91,6 +91,9 @@ cPanel keeps HTTPS traffic in `~/tmp/awstats/ssl` and HTTP traffic in `~/tmp/aws
 Everything AWStatium stored is removed. AWStats files are never modified.
 
 == Changelog ==
+
+= 1.0.3 =
+* Sorting by the Views column: items without a stored count sort as 0 instead of by an unrelated value, the stored count is corrected while the list is shown, and "Reload AWStats data" always resyncs the column.
 
 = 1.0.2 =
 * Settings and statistics pages: "Reload AWStats data" below the status, buttons to switch between the two pages, post type checkboxes one per line.

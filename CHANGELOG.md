@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.3
+- Sorting by the Views column: items without a stored count sort as 0 instead of by an unrelated value, the stored count is corrected while the list is shown, and "Reload AWStats data" always resyncs the column.
+
 ## 1.0.2
 - Settings and statistics pages: "Reload AWStats data" below the status, buttons to switch between the two pages, post type checkboxes one per line.
 

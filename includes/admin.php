@@ -13,6 +13,7 @@ add_action('admin_post_awstatium_refresh', function () {
     if (!current_user_can('manage_options')) wp_die(esc_html__('You are not allowed to do this.', 'awstatium'), '', ['response' => 403]);
     check_admin_referer('awstatium_refresh');
     $status = awstatium_rebuild(true);
+    if ($status !== 'busy' && $status !== 'error') awstatium_schedule_sync(); // a manual reload always resyncs the Views column
     $page   = (isset($_POST['back']) && $_POST['back'] === 'settings') ? 'options-general.php?page=awstatium-settings' : 'tools.php?page=awstatium';
     wp_safe_redirect(admin_url($page . '&awstatium_refresh=' . $status));
     exit;
@@ -258,6 +259,10 @@ add_action('admin_init', function () {
         add_action("manage_{$type}_posts_custom_column", function ($col, $id) {
             if ($col !== 'awstatium_views') return;
             $n = awstatium_get_views($id);
+            // Keep the stored count used for sorting in step with the number shown (post meta is already cached for the list)
+            if (get_post_status($id) === 'publish' && (string) get_post_meta($id, AWSTATIUM_META_VIEWS, true) !== (string) $n) {
+                update_post_meta($id, AWSTATIUM_META_VIEWS, $n);
+            }
             echo $n > 0 ? esc_html(number_format_i18n($n)) : '–';
         }, 10, 2);
         // true = the first click sorts from the most viewed
@@ -268,16 +273,16 @@ add_action('admin_init', function () {
     }
 });
 
-// Sorts by the stored count. Items without a count (new, not synced yet) are last when sorting from the most viewed.
-add_action('pre_get_posts', function ($q) {
-    if (!is_admin() || !$q->is_main_query() || $q->get('orderby') !== 'awstatium_views' || !awstatium_settings()['column']) return;
-    $q->set('meta_query', [
-        'relation'        => 'OR',
-        'awstatium_views' => ['key' => AWSTATIUM_META_VIEWS, 'type' => 'NUMERIC'],
-        ['key' => AWSTATIUM_META_VIEWS, 'compare' => 'NOT EXISTS'],
-    ]);
-    $q->set('orderby', 'awstatium_views');
-});
+// Sorts by the stored count. The meta key is part of the JOIN condition, so items without a stored count
+// sort as 0. (A meta_query with "EXISTS OR NOT EXISTS" would sort those items by an unrelated meta value.)
+add_filter('posts_clauses', function ($clauses, $q) {
+    global $wpdb;
+    if (!is_admin() || !$q->is_main_query() || $q->get('orderby') !== 'awstatium_views' || !awstatium_settings()['column']) return $clauses;
+    $order = strtoupper((string) $q->get('order')) === 'ASC' ? 'ASC' : 'DESC';
+    $clauses['join']   .= $wpdb->prepare(" LEFT JOIN {$wpdb->postmeta} AS awstatium_v ON (awstatium_v.post_id = {$wpdb->posts}.ID AND awstatium_v.meta_key = %s)", AWSTATIUM_META_VIEWS);
+    $clauses['orderby'] = "CAST(COALESCE(awstatium_v.meta_value, '0') AS UNSIGNED) $order, {$wpdb->posts}.ID $order";
+    return $clauses;
+}, 10, 2);
 
 add_action('admin_head-edit.php', function () {
     echo '<style>.fixed .column-awstatium_views{width:90px}</style>';

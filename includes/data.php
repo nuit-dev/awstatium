@@ -29,6 +29,9 @@ const AWSTATIUM_META_VIEWS   = '_awstatium_views'; // copy of the view count, fo
 const AWSTATIUM_META_OLD     = '_awstatium_old_paths';
 const AWSTATIUM_SYNC_BATCH   = 200;
 
+// One valid UTF-8 sequence (RFC 3629), or a single other byte >= 0x80 in group 1
+const AWSTATIUM_UTF8_OR_BYTE = '/[\xC2-\xDF][\x80-\xBF]|\xE0[\xA0-\xBF][\x80-\xBF]|[\xE1-\xEC\xEE\xEF][\x80-\xBF]{2}|\xED[\x80-\x9F][\x80-\xBF]|\xF0[\x90-\xBF][\x80-\xBF]{2}|[\xF1-\xF3][\x80-\xBF]{3}|\xF4[\x80-\x8F][\x80-\xBF]{2}|([\x80-\xFF])/';
+
 // Keys (without trailing slash) that are not readable pages: admin, API, assets, well-known and feeds
 const AWSTATIUM_SKIP = '#(^|/)(wp-admin|wp-json|wp-content|wp-includes)(/|$)|^/\.well-known(/|$)|/(feed|embed|trackback)$#';
 
@@ -216,12 +219,30 @@ function awstatium_canon_run($m) {
  * everything else percent-encoded with upper-case hex. Idempotent and always valid UTF-8.
  */
 function awstatium_canon($s) {
-    $s = preg_replace_callback('/(?:%[0-9A-Fa-f]{2})+/', 'awstatium_canon_run', (string) $s);
+    // Encoding a raw byte can complete an escape sequence next to it (raw \xC4 + "%8D" becomes "%C4%8D"),
+    // so the pass is repeated until nothing changes. Decoding only produces valid UTF-8, so this settles fast.
+    $s = (string) $s;
+    for ($i = 0; $i < 4; $i++) {
+        $next = awstatium_canon_pass($s);
+        if ($next === $s) break;
+        $s = $next;
+    }
+    return $s;
+}
+
+function awstatium_canon_pass($s) {
+    $s = preg_replace_callback('/(?:%[0-9A-Fa-f]{2})+/', 'awstatium_canon_run', $s);
     // A '%' that does not start an escape and characters not allowed in a path are encoded
     $s = preg_replace_callback('/%(?![0-9A-F]{2})|[^A-Za-z0-9\-._~!$&\'()*+,;=:@\/%\x80-\xFF]/', 'awstatium_pct', $s);
-    // Bytes that are not valid UTF-8 are encoded as well, so every key can be stored
-    if (!preg_match('//u', $s)) $s = preg_replace_callback('/[\x80-\xFF]/', 'awstatium_pct', $s);
+    // Raw bytes that are not part of valid UTF-8 are encoded as well, so every key can be stored.
+    // Valid UTF-8 characters next to them stay as they are, which keeps the form idempotent.
+    if (!preg_match('//u', $s)) $s = preg_replace_callback(AWSTATIUM_UTF8_OR_BYTE, 'awstatium_pct_invalid', $s);
     return $s;
+}
+
+/** Encodes a single invalid byte; a whole valid UTF-8 sequence is returned unchanged. */
+function awstatium_pct_invalid($m) {
+    return (isset($m[1]) && $m[1] !== '') ? sprintf('%%%02X', ord($m[1])) : $m[0];
 }
 
 /** Canonical path without query string or fragment. Case is kept. */
@@ -387,15 +408,36 @@ function awstatium_active() {
     return (string) get_option(AWSTATIUM_OPT_ACTIVE, '');
 }
 
+/** One part ('data' or 'totals') of a source's snapshot, or null if it is missing. */
+function awstatium_snapshot($kind, $src) {
+    if ($src === '') return null;
+    $v = get_option(awstatium_opt($kind, $src));
+    return (is_array($v) && ($v['src'] ?? '') === $src) ? $v : null;
+}
+
+/**
+ * Part of the active snapshot. A switch of source may remove the previous snapshot right after this request
+ * read the pointer; then the pointer is read again from the database and the new snapshot is used.
+ * Readers never take the lock and see either the previous or the new numbers, never nothing.
+ */
+function awstatium_active_snapshot($kind) {
+    $src = awstatium_active();
+    $v   = awstatium_snapshot($kind, $src);
+    if ($v === null && $src !== '') {
+        $now = (string) awstatium_option_fresh(AWSTATIUM_OPT_ACTIVE);
+        if ($now !== $src) $v = awstatium_snapshot($kind, $now);
+    }
+    return $v;
+}
+
 /** Monthly data of the active snapshot (no file access). false = forget the copy in memory. */
 function awstatium_data($fresh = null) {
     static $data = null;
     if ($fresh === false) return $data = null;
     if ($fresh !== null) return $data = $fresh;
     if ($data === null) {
-        $src  = awstatium_active();
-        $v    = $src !== '' ? get_option(awstatium_opt('data', $src)) : null;
-        $data = (is_array($v) && ($v['src'] ?? '') === $src && is_array($v['months'] ?? null)) ? $v['months'] : [];
+        $v    = awstatium_active_snapshot('data');
+        $data = ($v && is_array($v['months'] ?? null)) ? $v['months'] : [];
     }
     return $data;
 }
@@ -406,9 +448,8 @@ function awstatium_totals($fresh = null) {
     if ($fresh === false) return $t = null;
     if ($fresh !== null) return $t = $fresh;
     if ($t === null) {
-        $src = awstatium_active();
-        $v   = $src !== '' ? get_option(awstatium_opt('totals', $src)) : null;
-        $t   = (is_array($v) && ($v['src'] ?? '') === $src) ? $v : ['p' => [], 'd' => []];
+        $v = awstatium_active_snapshot('totals');
+        $t = $v ?: ['p' => [], 'd' => []];
     }
     return $t;
 }

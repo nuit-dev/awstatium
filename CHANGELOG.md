@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.5
+- Copyright and license notice (GPL-2.0-or-later, NUIT d.o.o.) and a note that AWStatium is not affiliated with the AWStats project.
+
 ## 1.0.4
 - Drafts, pending and scheduled items no longer show the home page views: their temporary ?p= / ?page_id= address has no views of its own. The Views column stores counts for items of every status, so sorting is correct in lists with drafts and private items.
 

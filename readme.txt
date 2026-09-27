@@ -4,7 +4,7 @@ Tags: awstats, statistics, page views, downloads, privacy
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.4
+Stable tag: 1.0.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -22,6 +22,8 @@ Most hosting control panels (cPanel, DirectAdmin) already run AWStats, which bui
 * **Previous URLs** – moved or renamed a page? Add its old addresses and their views are counted too. Old post slugs are added automatically.
 
 Nothing is added to your pages for counting: no JavaScript, no cookies, no database writes on page views and no requests to other services. The numbers come from the server logs that exist anyway.
+
+AWStatium is an independent project and is not affiliated with or endorsed by the AWStats project.
 
 = How it works =
 
@@ -90,7 +92,14 @@ cPanel keeps HTTPS traffic in `~/tmp/awstats/ssl` and HTTP traffic in `~/tmp/aws
 
 Everything AWStatium stored is removed. AWStats files are never modified.
 
+== Copyright ==
+
+Copyright (C) 2026 NUIT d.o.o. AWStatium is free software, released under the GNU General Public License, version 2 or later. It comes without any warranty; see the LICENSE file for details.
+
 == Changelog ==
+
+= 1.0.5 =
+* Copyright and license notice (GPL-2.0-or-later, NUIT d.o.o.) and a note that AWStatium is not affiliated with the AWStats project.
 
 = 1.0.4 =
 * Drafts, pending and scheduled items no longer show the home page views: their temporary ?p= / ?page_id= address has no views of its own. The Views column stores counts for items of every status, so sorting is correct in lists with drafts and private items.

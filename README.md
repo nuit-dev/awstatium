@@ -92,4 +92,8 @@ English and Croatian are included. The template is in `languages/awstatium.pot`.
 
 ## License
 
-GPL-2.0-or-later. Made by [NUIT d.o.o.](https://nuit.hr)
+Copyright (C) 2026 [NUIT d.o.o.](https://nuit.hr)
+
+AWStatium is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version. It is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; see [LICENSE](LICENSE) for details.
+
+AWStatium is an independent project and is not affiliated with or endorsed by the AWStats project. [AWStats](https://www.awstats.org/) is a separate open-source project.

@@ -4,7 +4,7 @@ Tags: awstats, statistics, page views, downloads, privacy
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -62,7 +62,7 @@ AWStatium stores only aggregated numbers per URL and per file name. It does not 
 * `[awstatium_views]` – views of the current post or page
 * `[awstatium_views id="123"]` – views of another post
 * `[awstatium_views path="/old/,/new/"]` – views of one or more URL paths
-* `[awstatium_views prefix="/blog/"]` – views of all pages below a path
+* `[awstatium_views prefix="/blog/"]` – views of all pages below a path (without the page at the path itself and pagination like /page/2/)
 * `[awstatium_views format="number"]` – just the number
 * `[awstatium_downloads match="report-2026"]` – downloads of files whose name contains the text
 
@@ -92,5 +92,8 @@ Everything AWStatium stored is removed. AWStats files are never modified.
 
 == Changelog ==
 
+= 1.0.1 =
+* Renamed to "AWStatium – Page Views from AWStats". Slug, shortcodes, functions and settings are unchanged.
+
 = 1.0.0 =
-* First release.
+* First stable release, in production on nuit.hr.

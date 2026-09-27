@@ -5,7 +5,7 @@
  * [awstatium_views]                                 views of the current post or page
  * [awstatium_views id="123"]                        views of another post
  * [awstatium_views path="/old/,/new/"]              views of one or more URL paths
- * [awstatium_views prefix="/comics/"]               views of all pages below a path
+ * [awstatium_views prefix="/comics/"]               views of all pages below a path (not the path itself, no /page/N)
  * [awstatium_views format="number"]                 just the number, without "views"
  * [awstatium_downloads match="report-2026"]         downloads of files whose name contains the text
  */

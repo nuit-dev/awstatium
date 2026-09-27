@@ -1,0 +1,14 @@
+# Changelog
+
+## 1.0.1
+- Renamed to "AWStatium – Page Views from AWStats". Slug, shortcodes, functions and settings are unchanged.
+
+## 1.0.0
+First stable release, in production on nuit.hr.
+- Readers survive a change of the data source: if the snapshot they read was just replaced, the new one is used.
+- Canonical form of URL keys is idempotent, also for mixed UTF-8 and invalid raw bytes.
+
+## Pre-release versions
+- **0.3.0** – Canonical percent-encoding of URL keys (RFC 3986), old slugs with `.html`, a separate snapshot per data source that becomes active only when fully saved.
+- **0.2.0** – Pages without a trailing slash and `.html` pages, case-sensitive paths, validation of a new data source, database lock, links for sites in a subdirectory, Multisite blocked, batched sync of the Views column, `Update URI`.
+- **0.1.0** – First build, based on the nuit-awstats plugin used on nuit.hr.

@@ -29,12 +29,24 @@ AWStats usually updates its data once a day. Awstatium checks for new data every
 
 Counts are based on what AWStats records: every page load of a URL, including reloads, without known bots.
 
+= How URLs are matched =
+
+* Any pretty permalink structure works: with or without a trailing slash, and with .html endings. `/about` and `/about/` count as the same page.
+* Paths are case-sensitive, as recorded by AWStats, and compared percent-decoded.
+* Query strings are ignored. AWStats leaves them out by default (`URLWithQuery=0`), and Awstatium drops them even when AWStats keeps them. Plain `?p=123` permalinks are therefore not supported.
+* Paths in shortcodes and "Previous URLs" are relative to the domain root, e.g. `/blog/about/` when WordPress runs in `/blog`.
+
 = Requirements =
 
 * AWStats data on the same server, readable by PHP. This is typical for cPanel (`~/tmp/awstats/ssl`, `~/tmp/awstats`) and DirectAdmin. Awstatium finds these directories automatically.
-* Pretty permalinks. AWStats ignores query strings, so plain `?p=123` links cannot be counted per page.
+* Pretty permalinks.
+* A single site. WordPress Multisite is not supported yet and the plugin refuses to activate on a network.
 
 It will not work on hosts that do not run AWStats or keep its data out of reach of PHP, which includes most managed WordPress hosting.
+
+= Privacy =
+
+Awstatium stores only aggregated numbers per URL and per file name. It does not read the visitor list of AWStats (IP addresses), sets no cookies and adds nothing to your pages for counting.
 
 == Installation ==
 
@@ -64,6 +76,10 @@ JavaScript counters usually count a visitor once per day or session and skip vis
 = Why is "AWStats pages" so much higher than "Page views"? =
 
 AWStats counts every file type that its config does not list as a non-page, often including images, fonts and admin-ajax.php. Awstatium's page views only include real pages: addresses ending with a slash, without admin, API and feed URLs.
+
+= What happens if I enter a wrong directory or config? =
+
+The new data source is read and checked before it is saved. If no usable AWStats files are found, the previous settings and all stored numbers are kept and an error is shown.
 
 = My site uses HTTP and HTTPS. Which directory should I pick? =
 

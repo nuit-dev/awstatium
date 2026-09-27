@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Awstatium 1.0.0\n"
 "Report-Msgid-Bugs-To: https://github.com/nuit-dev/awstatium/issues\n"
-"POT-Creation-Date: 2026-09-27 21:09+0200\n"
+"POT-Creation-Date: 2026-09-27 22:33+0200\n"
 "PO-Revision-Date: 2026-09-27 21:30+0200\n"
 "Last-Translator: NUIT d.o.o.\n"
 "Language-Team: Croatian\n"
@@ -14,7 +14,12 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#: awstatium.php:40 includes/data.php:517
+msgid "Awstatium does not support WordPress Multisite yet."
+msgstr "Awstatium još ne podržava WordPress Multisite."
 
 #: includes/admin.php:12
 msgid "Invalid request."
@@ -37,190 +42,212 @@ msgid ""
 "Loaded, but some AWStats files were skipped (incomplete or being written), "
 "so the previous data was kept for those months. Details are in the PHP error "
 "log."
-msgstr "Učitano, ali neke AWStats datoteke su preskočene (nepotpune ili su se upravo zapisivale), pa su za te mjesece zadržani prijašnji podaci. Detalji su u PHP error logu."
+msgstr ""
+"Učitano, ali neke AWStats datoteke su preskočene (nepotpune ili su se upravo "
+"zapisivale), pa su za te mjesece zadržani prijašnji podaci. Detalji su u PHP "
+"error logu."
 
-#: includes/admin.php:26
+#: includes/admin.php:26 includes/settings.php:90
 msgid ""
 "Saving to the database failed, the last saved data is shown. Details are in "
 "the PHP error log."
-msgstr "Spremanje u bazu nije uspjelo, prikazuju se zadnji spremljeni podaci. Detalji su u PHP error logu."
+msgstr ""
+"Spremanje u bazu nije uspjelo, prikazuju se zadnji spremljeni podaci. "
+"Detalji su u PHP error logu."
 
-#: includes/admin.php:39
+#: includes/admin.php:27
+msgid "Another refresh is running. Try again in a minute."
+msgstr "Upravo je u tijeku drugo osvježavanje. Pokušajte ponovno za minutu."
+
+#: includes/admin.php:40
 msgid "Awstatium has no AWStats data yet."
 msgstr "Awstatium još nema AWStats podataka."
 
-#: includes/admin.php:40 includes/admin.php:95 includes/admin.php:206
+#: includes/admin.php:41 includes/admin.php:97 includes/admin.php:209
 msgid "Check the settings"
 msgstr "Provjerite postavke"
 
-#: includes/admin.php:52
+#: includes/admin.php:53
 msgid "Home page"
 msgstr "Naslovnica"
 
-#: includes/admin.php:74 includes/admin.php:90
+#: includes/admin.php:75 includes/admin.php:91
 msgid "Awstatium statistics"
 msgstr "Awstatium statistika"
 
-#: includes/admin.php:94 includes/admin.php:206
+#: includes/admin.php:95 includes/admin.php:209
 msgid "No AWStats data yet."
 msgstr "Još nema AWStats podataka."
 
-#: includes/admin.php:99
+#: includes/admin.php:96 includes/settings.php:152
+msgid "Data is being loaded in the background. Reload this page in a minute."
+msgstr "Podaci se učitavaju u pozadini. Osvježite ovu stranicu za minutu."
+
+#: includes/admin.php:102
 msgid "Last AWStats update:"
 msgstr "Zadnje osvježavanje AWStatsa:"
 
-#: includes/admin.php:105
+#: includes/admin.php:108
 msgid "Page path (several separated by commas):"
 msgstr "Putanja stranice (više njih odvojeno zarezom):"
 
-#: includes/admin.php:106
+#: includes/admin.php:109
 msgid "everything below this path"
 msgstr "sve ispod ove putanje"
 
-#: includes/admin.php:107
+#: includes/admin.php:110
 msgid "Show"
 msgstr "Prikaži"
 
-#: includes/admin.php:122 includes/admin.php:123 includes/admin.php:173
-#: includes/admin.php:250
+#: includes/admin.php:125 includes/admin.php:126 includes/admin.php:176
+#: includes/admin.php:254
 msgid "Views"
 msgstr "Pregledi"
 
-#: includes/admin.php:122
+#: includes/admin.php:125
 msgid "(everything below)"
 msgstr "(sve ispod)"
 
-#: includes/admin.php:123 includes/admin.php:142 includes/admin.php:233
+#: includes/admin.php:126 includes/admin.php:145 includes/admin.php:236
 msgid "Month"
 msgstr "Mjesec"
 
-#: includes/admin.php:125 includes/admin.php:149 includes/admin.php:233
+#: includes/admin.php:128 includes/admin.php:152 includes/admin.php:236
 msgid "Total"
 msgstr "Ukupno"
 
-#: includes/admin.php:141
+#: includes/admin.php:144
 msgid "By month"
 msgstr "Po mjesecima"
 
-#: includes/admin.php:142 includes/admin.php:161 includes/admin.php:223
+#: includes/admin.php:145 includes/admin.php:164 includes/admin.php:226
 msgid "Visits"
 msgstr "Posjeti"
 
-#: includes/admin.php:142
+#: includes/admin.php:145
 msgid "Unique*"
 msgstr "Jedinstveni*"
 
-#: includes/admin.php:143
+#: includes/admin.php:146
 msgid "Page views**"
 msgstr "Pregledi stranica**"
 
-#: includes/admin.php:143
+#: includes/admin.php:146
 msgid "AWStats pages***"
 msgstr "Stranice (AWStats)***"
 
-#: includes/admin.php:143 includes/admin.php:162
+#: includes/admin.php:146 includes/admin.php:165
 msgid "Hits"
 msgstr "Zahtjevi"
 
-#: includes/admin.php:144 includes/admin.php:162
+#: includes/admin.php:147 includes/admin.php:165
 msgid "Bandwidth"
 msgstr "Promet"
 
-#: includes/admin.php:144
+#: includes/admin.php:147
 msgid "Not viewed (bots, errors)"
 msgstr "Ostalo (botovi, greške)"
 
-#: includes/admin.php:151
+#: includes/admin.php:154
 msgid ""
 "* Unique visitors are summed per month, so the total is not unique over the "
 "whole period."
-msgstr "* Jedinstveni posjetitelji zbrajaju se po mjesecima, pa ukupan broj nije broj jedinstvenih kroz cijelo razdoblje."
+msgstr ""
+"* Jedinstveni posjetitelji zbrajaju se po mjesecima, pa ukupan broj nije "
+"broj jedinstvenih kroz cijelo razdoblje."
 
-#: includes/admin.php:152
+#: includes/admin.php:155
 msgid ""
 "** Real pages only (addresses ending with /, without admin, API and feeds). "
 "The same number the shortcodes show."
-msgstr "** Samo stvarne stranice (adrese koje završavaju s /, bez admina, API-ja i feedova). Isti broj prikazuju shortcodeovi."
+msgstr ""
+"** Samo stvarne stranice (adrese koje završavaju s /, bez admina, API-ja i "
+"feedova). Isti broj prikazuju shortcodeovi."
 
-#: includes/admin.php:153
+#: includes/admin.php:156
 msgid ""
 "*** AWStats counts every file type that is not listed as a non-page in its "
 "config (often images, fonts and admin-ajax.php), so this number is usually "
 "much higher."
-msgstr "*** AWStats broji svaku vrstu datoteke koja u njegovoj konfiguraciji nije označena kao ne-stranica (često slike, fontove i admin-ajax.php), pa je ovaj broj obično puno veći."
+msgstr ""
+"*** AWStats broji svaku vrstu datoteke koja u njegovoj konfiguraciji nije "
+"označena kao ne-stranica (često slike, fontove i admin-ajax.php), pa je ovaj "
+"broj obično puno veći."
 
-#: includes/admin.php:160
+#: includes/admin.php:163
 msgid "By day"
 msgstr "Po danima"
 
-#: includes/admin.php:161
+#: includes/admin.php:164
 msgid "Day"
 msgstr "Dan"
 
-#: includes/admin.php:162
+#: includes/admin.php:165
 msgid "AWStats pages"
 msgstr "Stranice (AWStats)"
 
-#: includes/admin.php:172
+#: includes/admin.php:175
 msgid "Most viewed pages (all time)"
 msgstr "Najčitanije stranice (ukupno)"
 
-#: includes/admin.php:173
+#: includes/admin.php:176
 msgid "Page"
 msgstr "Stranica"
 
-#: includes/admin.php:173
+#: includes/admin.php:176
 msgid "Path"
 msgstr "Putanja"
 
-#: includes/admin.php:177
+#: includes/admin.php:180
 msgid "by month"
 msgstr "po mjesecima"
 
-#: includes/admin.php:184
+#: includes/admin.php:187
 msgid "Downloads (all time)"
 msgstr "Preuzimanja (ukupno)"
 
-#: includes/admin.php:186
+#: includes/admin.php:189
 msgid "No downloads recorded."
 msgstr "Nema zabilježenih preuzimanja."
 
-#: includes/admin.php:188
+#: includes/admin.php:191
 msgid "File"
 msgstr "Datoteka"
 
-#: includes/admin.php:188
+#: includes/admin.php:191
 msgid "Downloads"
 msgstr "Preuzimanja"
 
-#: includes/admin.php:223
+#: includes/admin.php:226
 msgid "Unique visitors"
 msgstr "Jedinstveni posjetitelji"
 
-#: includes/admin.php:223
+#: includes/admin.php:226
 msgid "Page views"
 msgstr "Pregledi stranica"
 
-#: includes/admin.php:233
+#: includes/admin.php:236
 msgid "Most viewed this month"
 msgstr "Najčitanije ovog mjeseca"
 
-#: includes/admin.php:242
+#: includes/admin.php:245
 msgid "All statistics →"
 msgstr "Sva statistika →"
 
-#: includes/admin.php:292
+#: includes/admin.php:296
 msgid "Previous URLs"
 msgstr "Stari URL-ovi"
 
-#: includes/admin.php:295
+#: includes/admin.php:299
 msgid ""
 "One per line. Views of these addresses are added to this page, e.g. after "
 "moving it. Old slugs of posts are added automatically."
-msgstr "Jedan po retku. Pregledi tih adresa pribrajaju se ovoj stranici, npr. nakon selidbe. Stari slugovi objava dodaju se automatski."
+msgstr ""
+"Jedan po retku. Pregledi tih adresa pribrajaju se ovoj stranici, npr. nakon "
+"selidbe. Stari slugovi objava dodaju se automatski."
 
 #. translators: %s: number of page views
-#: includes/data.php:417
+#: includes/data.php:598
 #, php-format
 msgid "%s view"
 msgid_plural "%s views"
@@ -229,7 +256,7 @@ msgstr[1] "%s pregleda"
 msgstr[2] "%s pregleda"
 
 #. translators: %s: number of downloads
-#: includes/data.php:422
+#: includes/data.php:603
 #, php-format
 msgid "%s download"
 msgid_plural "%s downloads"
@@ -237,96 +264,137 @@ msgstr[0] "%s preuzimanje"
 msgstr[1] "%s preuzimanja"
 msgstr[2] "%s preuzimanja"
 
-#: includes/settings.php:17 includes/settings.php:92
+#: includes/settings.php:17 includes/settings.php:140
 msgid "Awstatium settings"
 msgstr "Awstatium postavke"
 
+#: includes/settings.php:42
+msgid ""
+"Some AWStats files were skipped because they are incomplete. Details are in "
+"the PHP error log."
+msgstr "Neke AWStats datoteke su preskočene jer su nepotpune. Detalji su u PHP error logu."
+
+#: includes/settings.php:56
+msgid "The previous settings were kept."
+msgstr "Prijašnje postavke su zadržane."
+
+#: includes/settings.php:58
+msgid "Please enter the AWStats data directory and config."
+msgstr "Upišite mapu s AWStats podacima i konfiguraciju."
+
 #. translators: %s: directory path
-#: includes/settings.php:28
+#: includes/settings.php:61
 #, php-format
 msgid "The directory %s does not exist or PHP is not allowed to read it."
 msgstr "Mapa %s ne postoji ili je PHP ne smije čitati."
 
-#: includes/settings.php:54
+#. translators: 1: AWStats config name, 2: directory path
+#: includes/settings.php:66
+#, php-format
+msgid "No AWStats files for config %1$s were found in %2$s."
+msgstr "Za konfiguraciju %1$s u mapi %2$s nema AWStats datoteka."
+
+#. translators: %s: directory path
+#: includes/settings.php:69
+#, php-format
+msgid "The AWStats files in %s could not be read."
+msgstr "AWStats datoteke u mapi %s ne mogu se pročitati."
+
+#: includes/settings.php:89
+msgid ""
+"Another refresh is running. The new data will be loaded in the background in "
+"a minute."
+msgstr "Upravo je u tijeku drugo osvježavanje. Novi podaci učitat će se u pozadini za minutu."
+
+#: includes/settings.php:102
 msgid "Settings"
 msgstr "Postavke"
 
-#: includes/settings.php:77
+#: includes/settings.php:125
 msgid "Reload AWStats data"
 msgstr "Ponovno učitaj AWStats podatke"
 
-#: includes/settings.php:96
+#: includes/settings.php:144
 msgid "Status"
 msgstr "Stanje"
 
-#: includes/settings.php:100
+#: includes/settings.php:148
 msgid "AWStats files found"
 msgstr "Pronađene AWStats datoteke"
 
-#: includes/settings.php:102
+#: includes/settings.php:150
 msgid "None – check the directory and config below."
 msgstr "Nijedna – provjerite mapu i konfiguraciju ispod."
 
-#: includes/settings.php:103
+#: includes/settings.php:151
 msgid "Months loaded"
 msgstr "Učitani mjeseci"
 
-#: includes/settings.php:104
+#: includes/settings.php:153
 msgid "Last AWStats update"
 msgstr "Zadnje osvježavanje AWStatsa"
 
-#: includes/settings.php:106
+#: includes/settings.php:155
 msgid "Permalinks"
 msgstr "Stalne veze"
 
-#: includes/settings.php:106
+#: includes/settings.php:155
 msgid ""
 "Plain permalinks (?p=123) are in use. AWStats ignores query strings, so "
 "views per page cannot be counted. Choose another structure in Settings → "
 "Permalinks."
-msgstr "Koriste se obične stalne veze (?p=123). AWStats zanemaruje parametre u adresi, pa se pregledi po stranici ne mogu brojati. Odaberite drugu strukturu u Postavke → Stalne veze."
+msgstr ""
+"Koriste se obične stalne veze (?p=123). AWStats zanemaruje parametre u "
+"adresi, pa se pregledi po stranici ne mogu brojati. Odaberite drugu "
+"strukturu u Postavke → Stalne veze."
 
-#: includes/settings.php:109
+#: includes/settings.php:158
 msgid ""
 "PHP can only read these directories. If the AWStats directory is outside "
 "them, ask your host or copy the files to an allowed directory with a cron "
 "job."
-msgstr "PHP smije čitati samo ove mape. Ako je AWStats mapa izvan njih, obratite se hostingu ili cron zadatkom kopirajte datoteke u dopuštenu mapu."
+msgstr ""
+"PHP smije čitati samo ove mape. Ako je AWStats mapa izvan njih, obratite se "
+"hostingu ili cron zadatkom kopirajte datoteke u dopuštenu mapu."
 
-#: includes/settings.php:119
+#: includes/settings.php:168
 msgid "AWStats data directory"
 msgstr "Mapa s AWStats podacima"
 
-#: includes/settings.php:121
+#: includes/settings.php:170
 msgid ""
 "Directory with files named awstatsMMYYYY.example.com.txt. On cPanel this is "
 "usually ~/tmp/awstats/ssl (HTTPS) or ~/tmp/awstats (HTTP)."
-msgstr "Mapa s datotekama imena awstatsMMYYYY.primjer.hr.txt. Na cPanelu je to obično ~/tmp/awstats/ssl (HTTPS) ili ~/tmp/awstats (HTTP)."
+msgstr ""
+"Mapa s datotekama imena awstatsMMYYYY.primjer.hr.txt. Na cPanelu je to "
+"obično ~/tmp/awstats/ssl (HTTPS) ili ~/tmp/awstats (HTTP)."
 
-#: includes/settings.php:128
+#: includes/settings.php:177
 msgid "Found on this server:"
 msgstr "Pronađeno na ovom poslužitelju:"
 
-#: includes/settings.php:132 includes/settings.php:149
+#: includes/settings.php:181 includes/settings.php:198
 msgid "Use"
 msgstr "Koristi"
 
-#: includes/settings.php:139
+#: includes/settings.php:188
 msgid "AWStats config"
 msgstr "AWStats konfiguracija"
 
-#: includes/settings.php:141
+#: includes/settings.php:190
 msgid ""
 "The middle part of the file names, usually your domain. Addon domains on "
 "cPanel look like example.com.maindomain.com."
-msgstr "Srednji dio imena datoteka, obično vaša domena. Dodatne domene na cPanelu izgledaju ovako: primjer.hr.glavnadomena.hr."
+msgstr ""
+"Srednji dio imena datoteka, obično vaša domena. Dodatne domene na cPanelu "
+"izgledaju ovako: primjer.hr.glavnadomena.hr."
 
-#: includes/settings.php:144
+#: includes/settings.php:193
 msgid "In this directory:"
 msgstr "U ovoj mapi:"
 
 #. translators: %s: number of monthly files
-#: includes/settings.php:147
+#: includes/settings.php:196
 #, php-format
 msgid "%s month"
 msgid_plural "%s months"
@@ -334,44 +402,62 @@ msgstr[0] "%s mjesec"
 msgstr[1] "%s mjeseca"
 msgstr[2] "%s mjeseci"
 
-#: includes/settings.php:156
+#: includes/settings.php:205
 msgid "Show views automatically"
 msgstr "Automatski prikaži preglede"
 
-#: includes/settings.php:161
+#: includes/settings.php:210
 msgid "Position:"
 msgstr "Položaj:"
 
-#: includes/settings.php:162
+#: includes/settings.php:211
 msgid "Below the content"
 msgstr "Ispod sadržaja"
 
-#: includes/settings.php:163
+#: includes/settings.php:212
 msgid "Above the content"
 msgstr "Iznad sadržaja"
 
-#: includes/settings.php:165
+#: includes/settings.php:214
 msgid ""
 "Adds e.g. \"1,234 views\" to single posts of the selected types. It is "
 "hidden while the count is 0. You can also use the [awstatium_views] "
 "shortcode or awstatium_get_views() in your theme."
-msgstr "Dodaje npr. „1.234 pregleda“ na pojedinačne objave odabranih vrsta. Ne prikazuje se dok je broj 0. Možete koristiti i shortcode [awstatium_views] ili awstatium_get_views() u temi."
+msgstr ""
+"Dodaje npr. „1.234 pregleda“ na pojedinačne objave odabranih vrsta. Ne "
+"prikazuje se dok je broj 0. Možete koristiti i shortcode [awstatium_views] "
+"ili awstatium_get_views() u temi."
 
-#: includes/settings.php:169
+#: includes/settings.php:218
+msgid "Admin lists"
+msgstr "Popisi u adminu"
+
+#: includes/settings.php:219
+msgid "Show a sortable Views column in the lists of posts and pages"
+msgstr "Prikaži stupac Pregledi s mogućnošću sortiranja u popisima objava i stranica"
+
+#: includes/settings.php:222
 msgid "Page cache"
 msgstr "Predmemorija stranica"
 
-#: includes/settings.php:170
+#: includes/settings.php:223
 msgid "Purge the page cache when new AWStats data arrives"
 msgstr "Očisti predmemoriju stranica kad stignu novi AWStats podaci"
 
-#: includes/settings.php:171
+#: includes/settings.php:224
 msgid ""
 "Supports LiteSpeed Cache, WP Rocket, W3 Total Cache, WP Super Cache, Cache "
 "Enabler and SiteGround Speed Optimizer. Other plugins can use the "
 "awstatium_purge_cache action."
-msgstr "Podržava LiteSpeed Cache, WP Rocket, W3 Total Cache, WP Super Cache, Cache Enabler i SiteGround Speed Optimizer. Drugi plugini mogu koristiti akciju awstatium_purge_cache."
+msgstr ""
+"Podržava LiteSpeed Cache, WP Rocket, W3 Total Cache, WP Super Cache, Cache "
+"Enabler i SiteGround Speed Optimizer. Drugi plugini mogu koristiti akciju "
+"awstatium_purge_cache."
 
 #. Description of the plugin
-msgid "Page views, downloads and traffic statistics from your server's AWStats data. No tracking scripts, no cookies."
-msgstr "Pregledi stranica, preuzimanja i statistika posjećenosti iz AWStats podataka vašeg poslužitelja. Bez skripti za praćenje i bez kolačića."
+msgid ""
+"Page views, downloads and traffic statistics from your server's AWStats "
+"data. No tracking scripts, no cookies."
+msgstr ""
+"Pregledi stranica, preuzimanja i statistika posjećenosti iz AWStats podataka "
+"vašeg poslužitelja. Bez skripti za praćenje i bez kolačića."

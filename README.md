@@ -17,9 +17,18 @@ Nothing is added to your pages for counting: no JavaScript, no cookies, no datab
 
 - WordPress 6.0+, PHP 7.4+
 - AWStats data on the same server, readable by PHP. Typical for cPanel (`~/tmp/awstats/ssl`, `~/tmp/awstats`) and DirectAdmin; Awstatium finds these automatically.
-- Pretty permalinks (AWStats ignores query strings, so `?p=123` links cannot be counted per page)
+- Pretty permalinks
+- A single site: WordPress Multisite is not supported yet, the plugin refuses to activate on a network
 
 It does not work on hosts without AWStats or where PHP cannot read its data, which includes most managed WordPress hosting.
+
+## How URLs are matched
+
+- Any pretty permalink structure works: with or without a trailing slash, and with `.html` endings. `/about` and `/about/` count as the same page.
+- Paths are case-sensitive, as recorded by AWStats, and compared percent-decoded.
+- Query strings are ignored. AWStats leaves them out by default (`URLWithQuery=0`) and Awstatium drops them even when AWStats keeps them, so plain `?p=123` permalinks are not supported.
+- Paths in shortcodes and "Previous URLs" are relative to the domain root, e.g. `/blog/about/` when WordPress runs in `/blog`.
+- When WordPress files live in their own directory (e.g. `/wordpress` with the site at `/`), views of `/wordpress/about/` are added to `/about/`.
 
 ## Installation
 
@@ -62,7 +71,18 @@ Other cache plugins can hook into `awstatium_purge_cache`, which fires when the 
 
 AWStats usually updates its data once a day. Awstatium checks for new data every hour, parses only the files that changed, stores the monthly numbers in the database and purges the page cache when counts change. Visitors only read the stored numbers; AWStats files are never parsed during a page view.
 
-A broken or half-written AWStats file never replaces good data: the previous numbers for that month are kept and the problem is logged.
+- A broken or half-written AWStats file never replaces good data: the previous numbers for that month are kept and the problem is logged.
+- A new data source (directory or config) is read and checked before it is accepted; a typo keeps the previous settings and numbers.
+- Refreshes and changes of the data source are serialised with a database lock, and stored data is tagged with its source, so two sources are never mixed.
+- The sortable "Views" column is updated in batches in the background and resumes after an interruption.
+
+## Privacy
+
+Awstatium stores only aggregated numbers per URL and per file name. It does not read the AWStats visitor list (IP addresses), sets no cookies and adds nothing to your pages for counting.
+
+## Updates
+
+The plugin header contains `Update URI: https://github.com/nuit-dev/awstatium`, so WordPress never offers an unrelated plugin with the same slug from WordPress.org as an update. New versions are installed manually from Releases.
 
 ## Translations
 

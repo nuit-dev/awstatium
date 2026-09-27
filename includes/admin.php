@@ -24,6 +24,7 @@ function awstatium_refresh_notice() {
         'none'    => ['info', __('No new data, everything was already loaded.', 'awstatium')],
         'partial' => ['warning', __('Loaded, but some AWStats files were skipped (incomplete or being written), so the previous data was kept for those months. Details are in the PHP error log.', 'awstatium')],
         'error'   => ['error', __('Saving to the database failed, the last saved data is shown. Details are in the PHP error log.', 'awstatium')],
+        'busy'    => ['warning', __('Another refresh is running. Try again in a minute.', 'awstatium')],
     ];
     $key = isset($_GET['awstatium_refresh']) ? sanitize_key(wp_unslash($_GET['awstatium_refresh'])) : '';
     if (isset($notices[$key])) {
@@ -47,10 +48,10 @@ function awstatium_ym_label($ym) {
     return wp_date('F Y', $ts, new DateTimeZone('UTC'));
 }
 
-/** Title of the post at a path, or the path itself. */
+/** Title of the post at a root-relative path, or the path itself. */
 function awstatium_path_title($path) {
-    if ($path === '/') return __('Home page', 'awstatium');
-    $id = url_to_postid(home_url($path));
+    if ($path === awstatium_home_key()) return __('Home page', 'awstatium');
+    $id = url_to_postid(awstatium_path_url($path));
     return $id ? get_the_title($id) : $path;
 }
 
@@ -91,8 +92,10 @@ function awstatium_stats_page() {
     awstatium_refresh_notice();
 
     if (!$months) {
-        echo '<p>' . esc_html__('No AWStats data yet.', 'awstatium') . ' <a href="' . esc_url(admin_url('options-general.php?page=awstatium-settings')) . '">'
-           . esc_html__('Check the settings', 'awstatium') . '</a></p></div>';
+        echo '<p>' . esc_html__('No AWStats data yet.', 'awstatium') . ' ';
+        if (wp_next_scheduled('awstatium_refresh_now')) echo esc_html__('Data is being loaded in the background. Reload this page in a minute.', 'awstatium') . ' ';
+        echo '<a href="' . esc_url(admin_url('options-general.php?page=awstatium-settings')) . '">' . esc_html__('Check the settings', 'awstatium') . '</a> '
+           . awstatium_refresh_form('stats') . '</p></div>'; // phpcs:ignore WordPress.Security.EscapeOutput -- form built from escaped parts
         return;
     }
 
@@ -173,7 +176,7 @@ function awstatium_stats_page() {
        . esc_html__('Page', 'awstatium') . '</th><th>' . esc_html__('Path', 'awstatium') . '</th><th>' . esc_html__('Views', 'awstatium') . '</th><th></th></tr></thead><tbody>';
     foreach (array_slice($p, 0, 50, true) as $u => $n) {
         $u = (string) $u;
-        echo '<tr><td><a href="' . esc_url(home_url($u)) . '" target="_blank">' . esc_html(awstatium_path_title($u)) . '</a></td><td><code>' . esc_html($u) . '</code></td><td>' . esc_html($num($n)) . '</td>'
+        echo '<tr><td><a href="' . esc_url(awstatium_path_url($u)) . '" target="_blank">' . esc_html(awstatium_path_title($u)) . '</a></td><td><code>' . esc_html($u) . '</code></td><td>' . esc_html($num($n)) . '</td>'
            . '<td><a href="' . esc_url(add_query_arg('path', rawurlencode($u), $base)) . '">' . esc_html__('by month', 'awstatium') . '</a></td></tr>';
     }
     echo '</tbody></table>';
@@ -233,7 +236,7 @@ function awstatium_dashboard_widget() {
         echo '<table class="widefat striped"><thead><tr><th>' . esc_html__('Most viewed this month', 'awstatium') . '</th><th>' . esc_html__('Month', 'awstatium') . '</th><th>' . esc_html__('Total', 'awstatium') . '</th></tr></thead><tbody>';
         foreach ($top as $u => $n) {
             $u = (string) $u;
-            echo '<tr><td><a href="' . esc_url(home_url($u)) . '" target="_blank">' . esc_html(awstatium_path_title($u)) . '</a></td><td>'
+            echo '<tr><td><a href="' . esc_url(awstatium_path_url($u)) . '" target="_blank">' . esc_html(awstatium_path_title($u)) . '</a></td><td>'
                . esc_html($num($n)) . '</td><td>' . esc_html($num($all[$u] ?? 0)) . '</td></tr>';
         }
         echo '</tbody></table>';
@@ -245,6 +248,7 @@ function awstatium_dashboard_widget() {
 /* ---------- "Views" column in post lists ---------- */
 
 add_action('admin_init', function () {
+    if (!awstatium_settings()['column']) return;
     foreach (array_keys(awstatium_post_types()) as $type) {
         add_filter("manage_{$type}_posts_columns", function ($cols) {
             $cols['awstatium_views'] = __('Views', 'awstatium');
@@ -265,7 +269,7 @@ add_action('admin_init', function () {
 
 // Sorts by the stored count. Items without a count (new, not synced yet) are last when sorting from the most viewed.
 add_action('pre_get_posts', function ($q) {
-    if (!is_admin() || !$q->is_main_query() || $q->get('orderby') !== 'awstatium_views') return;
+    if (!is_admin() || !$q->is_main_query() || $q->get('orderby') !== 'awstatium_views' || !awstatium_settings()['column']) return;
     $q->set('meta_query', [
         'relation'        => 'OR',
         'awstatium_views' => ['key' => AWSTATIUM_META_VIEWS, 'type' => 'NUMERIC'],

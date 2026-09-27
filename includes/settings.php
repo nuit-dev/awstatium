@@ -18,32 +18,80 @@ add_action('admin_menu', function () {
 });
 
 function awstatium_sanitize_settings($in) {
-    $in     = is_array($in) ? $in : [];
-    $dir    = untrailingslashit(trim(sanitize_text_field($in['dir'] ?? '')));
-    $config = preg_replace('/[^A-Za-z0-9._-]/', '', (string) ($in['config'] ?? ''));
-    $types  = array_values(array_intersect(array_map('strval', (array) ($in['auto_display'] ?? [])), array_keys(awstatium_post_types())));
-
-    if ($dir !== '' && !@is_dir($dir)) {
-        /* translators: %s: directory path */
-        add_settings_error(AWSTATIUM_OPT_SETTINGS, 'dir', sprintf(__('The directory %s does not exist or PHP is not allowed to read it.', 'awstatium'), $dir));
-    }
-
-    return [
-        'dir'          => $dir,
-        'config'       => $config,
-        'auto_display' => $types,
+    $in  = is_array($in) ? $in : [];
+    $old = awstatium_settings();
+    $new = [
+        'dir'          => untrailingslashit(trim(sanitize_text_field($in['dir'] ?? ''))),
+        'config'       => preg_replace('/[^A-Za-z0-9._-]/', '', (string) ($in['config'] ?? '')),
+        'auto_display' => array_values(array_intersect(array_map('strval', (array) ($in['auto_display'] ?? [])), array_keys(awstatium_post_types()))),
         'position'     => ($in['position'] ?? '') === 'before' ? 'before' : 'after',
         'purge'        => empty($in['purge']) ? 0 : 1,
+        'column'       => empty($in['column']) ? 0 : 1,
     ];
+
+    // A new data source is parsed and checked before it is accepted. If it is not usable,
+    // the previous source and its stored data stay as they are.
+    if (awstatium_source_id($new) !== awstatium_source_id($old)) {
+        [$error, $months, $bad] = awstatium_validate_source($new);
+        if ($error !== '') {
+            add_settings_error(AWSTATIUM_OPT_SETTINGS, 'source', $error);
+            $new['dir']    = $old['dir'];
+            $new['config'] = $old['config'];
+        } else {
+            $GLOBALS['awstatium_pending'] = ['src' => awstatium_source_id($new), 'months' => $months];
+            if ($bad) add_settings_error(AWSTATIUM_OPT_SETTINGS, 'partial', __('Some AWStats files were skipped because they are incomplete. Details are in the PHP error log.', 'awstatium'), 'warning');
+        }
+    }
+    return $new;
 }
 
-/** A new data source means the stored data belongs to something else: start over. */
+/**
+ * Parses a data source for validation. Returns [error message or '', months, bad files].
+ * Cached per request, because WordPress may sanitise a new option twice.
+ */
+function awstatium_validate_source(array $s) {
+    static $done = [];
+    $src = awstatium_source_id($s);
+    if (isset($done[$src])) return $done[$src];
+    $kept = ' ' . __('The previous settings were kept.', 'awstatium');
+    if ($s['dir'] === '' || $s['config'] === '') {
+        $r = [__('Please enter the AWStats data directory and config.', 'awstatium') . $kept, [], 0];
+    } elseif (!@is_dir($s['dir'])) {
+        /* translators: %s: directory path */
+        $r = [sprintf(__('The directory %s does not exist or PHP is not allowed to read it.', 'awstatium'), $s['dir']) . $kept, [], 0];
+    } else {
+        [$months, , $bad, $files] = awstatium_parse_source($s, [], true);
+        if (!$files) {
+            /* translators: 1: AWStats config name, 2: directory path */
+            $r = [sprintf(__('No AWStats files for config %1$s were found in %2$s.', 'awstatium'), $s['config'], $s['dir']) . $kept, [], 0];
+        } elseif (!$months) {
+            /* translators: %s: directory path */
+            $r = [sprintf(__('The AWStats files in %s could not be read.', 'awstatium'), $s['dir']) . $kept, [], 0];
+        } else {
+            $r = ['', $months, $bad];
+        }
+    }
+    return $done[$src] = $r;
+}
+
+/** Publishes a new data source, purges caches after display changes and starts the column sync when enabled. */
 function awstatium_settings_changed($old, $new) {
-    $old = is_array($old) ? $old : [];
-    $new = is_array($new) ? $new : [];
-    if (($old['dir'] ?? '') === ($new['dir'] ?? '') && ($old['config'] ?? '') === ($new['config'] ?? '')) return;
-    awstatium_reset();
-    awstatium_rebuild();
+    if (!empty($GLOBALS['awstatium_activating'])) return; // activation loads the data in the background
+    awstatium_data(false);   // copies in memory may belong to the previous settings
+    awstatium_totals(false);
+    $old = wp_parse_args(is_array($old) ? $old : [], awstatium_defaults());
+    $new = wp_parse_args(is_array($new) ? $new : [], awstatium_defaults());
+
+    if (awstatium_source_id($old) !== awstatium_source_id($new)) {
+        $pending = $GLOBALS['awstatium_pending'] ?? null;
+        $months  = ($pending && $pending['src'] === awstatium_source_id($new)) ? $pending['months'] : null;
+        $status  = awstatium_publish_source($new, $months);
+        if ($status === 'busy') add_settings_error(AWSTATIUM_OPT_SETTINGS, 'busy', __('Another refresh is running. The new data will be loaded in the background in a minute.', 'awstatium'), 'warning');
+        if ($status === 'error') add_settings_error(AWSTATIUM_OPT_SETTINGS, 'error', __('Saving to the database failed, the last saved data is shown. Details are in the PHP error log.', 'awstatium'));
+        return;
+    }
+    if ($old['auto_display'] !== $new['auto_display'] || $old['position'] !== $new['position']) awstatium_purge_caches();
+    if ($new['column'] && !$old['column']) awstatium_schedule_sync();
 }
 add_action('update_option_' . AWSTATIUM_OPT_SETTINGS, 'awstatium_settings_changed', 10, 2);
 add_action('add_option_' . AWSTATIUM_OPT_SETTINGS, function ($name, $value) {
@@ -100,7 +148,8 @@ function awstatium_settings_page() {
     $row(__('AWStats files found', 'awstatium'), $files
         ? esc_html(number_format_i18n(count($files)))
         : '<strong style="color:#b32d2e">' . esc_html__('None – check the directory and config below.', 'awstatium') . '</strong>');
-    $row(__('Months loaded', 'awstatium'), esc_html(number_format_i18n(count($data))));
+    $row(__('Months loaded', 'awstatium'), esc_html(number_format_i18n(count($data)))
+        . (!$data && wp_next_scheduled('awstatium_refresh_now') ? ' – ' . esc_html__('Data is being loaded in the background. Reload this page in a minute.', 'awstatium') : ''));
     $row(__('Last AWStats update', 'awstatium'), esc_html($last !== '' ? awstatium_dt($last) : '–') . ' ' . awstatium_refresh_form('settings'));
     if (!awstatium_pretty_permalinks()) {
         $row(__('Permalinks', 'awstatium'), '<strong style="color:#b32d2e">' . esc_html__('Plain permalinks (?p=123) are in use. AWStats ignores query strings, so views per page cannot be counted. Choose another structure in Settings → Permalinks.', 'awstatium') . '</strong>');
@@ -164,6 +213,10 @@ function awstatium_settings_page() {
        . '</select></label></p>'
        . '<p class="description">' . esc_html__('Adds e.g. "1,234 views" to single posts of the selected types. It is hidden while the count is 0. You can also use the [awstatium_views] shortcode or awstatium_get_views() in your theme.', 'awstatium') . '</p>'
        . '</fieldset></td></tr>';
+
+    // Admin column
+    echo '<tr><th scope="row">' . esc_html__('Admin lists', 'awstatium') . '</th><td><label><input type="checkbox" name="' . esc_attr($name) . '[column]" value="1"' . checked($s['column'], 1, false) . '> '
+       . esc_html__('Show a sortable Views column in the lists of posts and pages', 'awstatium') . '</label></td></tr>';
 
     // Cache
     echo '<tr><th scope="row">' . esc_html__('Page cache', 'awstatium') . '</th><td><label><input type="checkbox" name="' . esc_attr($name) . '[purge]" value="1"' . checked($s['purge'], 1, false) . '> '

@@ -24,8 +24,9 @@ It does not work on hosts without AWStats or where PHP cannot read its data, whi
 
 ## How URLs are matched
 
-- Any pretty permalink structure works: with or without a trailing slash, and with `.html` endings. `/about` and `/about/` count as the same page.
-- Paths are case-sensitive, as recorded by AWStats, and compared percent-decoded.
+- A page is an address that ends with a slash, has no file extension, or ends with `.html`/`.htm`. This covers the usual permalink structures; other extensions (e.g. `.php`) are treated as files.
+- `/about` and `/about/` count as the same page. Paths are case-sensitive, as recorded by AWStats.
+- Percent-encoding is normalised (RFC 3986, 6.2.2): letters, digits and UTF-8 characters are compared decoded, reserved characters such as `%2F`, `%3F` or `%25` stay encoded, so they keep their meaning. The normalised form is stable, so stored keys can be normalised again without change.
 - Query strings are ignored. AWStats leaves them out by default (`URLWithQuery=0`) and Awstatium drops them even when AWStats keeps them, so plain `?p=123` permalinks are not supported.
 - Paths in shortcodes and "Previous URLs" are relative to the domain root, e.g. `/blog/about/` when WordPress runs in `/blog`.
 - When WordPress files live in their own directory (e.g. `/wordpress` with the site at `/`), views of `/wordpress/about/` are added to `/about/`.
@@ -73,7 +74,8 @@ AWStats usually updates its data once a day. Awstatium checks for new data every
 
 - A broken or half-written AWStats file never replaces good data: the previous numbers for that month are kept and the problem is logged.
 - A new data source (directory or config) is read and checked before it is accepted; a typo keeps the previous settings and numbers.
-- Refreshes and changes of the data source are serialised with a database lock, and stored data is tagged with its source, so two sources are never mixed.
+- Each source has its own stored snapshot. A new source becomes active only after its data and totals are saved, so a failed switch keeps showing the previous numbers and is retried.
+- Refreshes and changes of the data source are serialised with a database lock, so two sources are never mixed.
 - The sortable "Views" column is updated in batches in the background and resumes after an interruption.
 
 ## Privacy

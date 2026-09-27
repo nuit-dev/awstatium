@@ -31,8 +31,9 @@ Counts are based on what AWStats records: every page load of a URL, including re
 
 = How URLs are matched =
 
-* Any pretty permalink structure works: with or without a trailing slash, and with .html endings. `/about` and `/about/` count as the same page.
-* Paths are case-sensitive, as recorded by AWStats, and compared percent-decoded.
+* A page is an address that ends with a slash, has no file extension, or ends with .html/.htm. This covers the usual permalink structures; other extensions (e.g. .php) are treated as files, not pages.
+* `/about` and `/about/` count as the same page. Paths are case-sensitive, as recorded by AWStats.
+* Percent-encoding is normalised (RFC 3986): letters, digits and UTF-8 characters are compared decoded, reserved characters such as `%2F`, `%3F` or `%25` stay encoded, so they keep their meaning.
 * Query strings are ignored. AWStats leaves them out by default (`URLWithQuery=0`), and Awstatium drops them even when AWStats keeps them. Plain `?p=123` permalinks are therefore not supported.
 * Paths in shortcodes and "Previous URLs" are relative to the domain root, e.g. `/blog/about/` when WordPress runs in `/blog`.
 
@@ -75,11 +76,11 @@ JavaScript counters usually count a visitor once per day or session and skip vis
 
 = Why is "AWStats pages" so much higher than "Page views"? =
 
-AWStats counts every file type that its config does not list as a non-page, often including images, fonts and admin-ajax.php. Awstatium's page views only include real pages: addresses ending with a slash, without admin, API and feed URLs.
+AWStats counts every file type that its config does not list as a non-page, often including images, fonts and admin-ajax.php. Awstatium's page views only include pages (addresses ending with a slash, without a file extension or ending with .html), without admin, API and feed URLs.
 
 = What happens if I enter a wrong directory or config? =
 
-The new data source is read and checked before it is saved. If no usable AWStats files are found, the previous settings and all stored numbers are kept and an error is shown.
+The new data source is read and checked before it is saved. If no usable AWStats files are found, the previous settings and all stored numbers are kept and an error is shown. If saving the new data fails, the previous numbers stay visible until the new source is saved successfully; this is retried automatically.
 
 = My site uses HTTP and HTTPS. Which directory should I pick? =
 

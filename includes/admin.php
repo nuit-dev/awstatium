@@ -152,7 +152,7 @@ function awstatium_stats_page() {
     echo '</tbody><tfoot>' . $cell('<strong>' . esc_html__('Total', 'awstatium') . '</strong>', $tot) . '</tfoot></table>'; // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts
     echo '<p class="description">'
        . esc_html__('* Unique visitors are summed per month, so the total is not unique over the whole period.', 'awstatium') . '<br>'
-       . esc_html__('** Real pages only (addresses ending with /, without admin, API and feeds). The same number the shortcodes show.', 'awstatium') . '<br>'
+       . esc_html__('** Pages only: addresses ending with /, without a file extension or ending with .html, without admin, API and feeds. The same number the shortcodes show.', 'awstatium') . '<br>'
        . esc_html__('*** AWStats counts every file type that is not listed as a non-page in its config (often images, fonts and admin-ajax.php), so this number is usually much higher.', 'awstatium')
        . '</p>';
 
@@ -189,7 +189,8 @@ function awstatium_stats_page() {
         echo '<p>' . esc_html__('No downloads recorded.', 'awstatium') . '</p>';
     } else {
         echo '<table class="widefat striped"><thead><tr><th>' . esc_html__('File', 'awstatium') . '</th><th>' . esc_html__('Downloads', 'awstatium') . '</th></tr></thead><tbody>';
-        foreach (array_slice($d, 0, 30, true) as $f => $n) echo '<tr><td>' . esc_html((string) $f) . '</td><td>' . esc_html($num($n)) . '</td></tr>';
+        // Readable form for display only (%20 as a space); the stored name stays canonical
+        foreach (array_slice($d, 0, 30, true) as $f => $n) echo '<tr><td>' . esc_html(rawurldecode((string) $f)) . '</td><td>' . esc_html($num($n)) . '</td></tr>';
         echo '</tbody></table>';
     }
     echo '</div>';

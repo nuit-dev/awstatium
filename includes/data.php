@@ -6,17 +6,23 @@
  * Front-end requests read the last saved totals and never touch the files.
  *
  * URL policy:
- * - Paths are compared percent-decoded and case-sensitive, as recorded by AWStats (RFC 3986).
- * - A trailing slash does not make a different page: /about and /about/ are the same key.
+ * - Paths are compared in one canonical form (RFC 3986, 6.2.2): unreserved characters and valid UTF-8
+ *   are decoded, reserved and other characters stay percent-encoded with upper-case hex. The form is
+ *   idempotent, so a key can be normalised again (e.g. from "Previous URLs") without changing meaning.
+ * - Paths are case-sensitive. A trailing slash does not make a different page: /about and /about/ are one key.
  * - Query strings are ignored, so plain ?p=123 permalinks are not supported.
  * - Paths are relative to the domain root, like the ones AWStats records.
+ *
+ * Stored data: each source (directory + config) has its own data and totals options. The "active" option
+ * points at the snapshot that is shown. A new source becomes active only after its data and totals are
+ * saved, so a failed switch keeps showing the previous numbers.
  */
 
 defined('ABSPATH') || exit;
 
 const AWSTATIUM_OPT_SETTINGS = 'awstatium_settings';
-const AWSTATIUM_OPT_DATA     = 'awstatium_data';   // ['src' => source id, 'months' => parsed data per month]
-const AWSTATIUM_OPT_TOTALS   = 'awstatium_totals'; // ['src' => source id, 'p' => views, 'd' => downloads], the only thing the front end reads
+const AWSTATIUM_OPT_ACTIVE   = 'awstatium_active'; // source id of the snapshot that is shown
+// Per source: awstatium_data_<id> = ['src', 'months'], awstatium_totals_<id> = ['src', 'p' => views, 'd' => downloads]
 const AWSTATIUM_OPT_SYNC     = 'awstatium_sync';   // pending "Views" column sync: ['gen' => id, 'offset' => n]
 const AWSTATIUM_OPT_LOCK     = 'awstatium_lock';
 const AWSTATIUM_META_VIEWS   = '_awstatium_views'; // copy of the view count, for sorting the admin list
@@ -44,12 +50,21 @@ function awstatium_settings() {
     return wp_parse_args(is_array($s) ? $s : [], awstatium_defaults());
 }
 
-/** Settings straight from the database, past any cache, for decisions that must not use a stale copy. */
-function awstatium_settings_fresh() {
+/** An option straight from the database, past any cache, for decisions that must not use a stale copy. */
+function awstatium_option_fresh($name) {
     global $wpdb;
-    $raw = $wpdb->get_var($wpdb->prepare("SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", AWSTATIUM_OPT_SETTINGS));
-    $s   = maybe_unserialize((string) $raw);
+    $raw = $wpdb->get_var($wpdb->prepare("SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $name));
+    return $raw === null ? null : maybe_unserialize((string) $raw);
+}
+
+function awstatium_settings_fresh() {
+    $s = awstatium_option_fresh(AWSTATIUM_OPT_SETTINGS);
     return wp_parse_args(is_array($s) ? $s : [], awstatium_defaults());
+}
+
+/** Option names of one source's snapshot. */
+function awstatium_opt($kind, $src) {
+    return 'awstatium_' . $kind . '_' . substr((string) $src, 0, 12);
 }
 
 /** Identity of a data source. Stored data of another source is never shown or merged. */
@@ -167,11 +182,52 @@ function awstatium_files($s = null) {
 
 /* ---------- Paths ---------- */
 
-/** Percent-decoded path without query string or fragment. Case is kept. */
+function awstatium_pct($m) {
+    return sprintf('%%%02X', ord($m[0]));
+}
+
+/** Decodes one run of %XX escapes, keeping only unreserved ASCII and valid UTF-8 decoded. */
+function awstatium_canon_run($m) {
+    $b   = rawurldecode($m[0]);
+    $out = '';
+    $len = strlen($b);
+    for ($i = 0; $i < $len;) {
+        $c = ord($b[$i]);
+        if ($c < 0x80) {
+            $out .= preg_match('/[A-Za-z0-9\-._~]/', $b[$i]) ? $b[$i] : sprintf('%%%02X', $c);
+            $i++;
+            continue;
+        }
+        $n   = $c >= 0xF0 ? 4 : ($c >= 0xE0 ? 3 : ($c >= 0xC2 ? 2 : 0));
+        $seq = $n ? substr($b, $i, $n) : '';
+        if ($n && strlen($seq) === $n && preg_match('//u', $seq)) {
+            $out .= $seq;
+            $i   += $n;
+        } else {
+            $out .= sprintf('%%%02X', $c);
+            $i++;
+        }
+    }
+    return $out;
+}
+
+/**
+ * Canonical percent-encoding of a path (RFC 3986, 6.2.2): unreserved characters and valid UTF-8 decoded,
+ * everything else percent-encoded with upper-case hex. Idempotent and always valid UTF-8.
+ */
+function awstatium_canon($s) {
+    $s = preg_replace_callback('/(?:%[0-9A-Fa-f]{2})+/', 'awstatium_canon_run', (string) $s);
+    // A '%' that does not start an escape and characters not allowed in a path are encoded
+    $s = preg_replace_callback('/%(?![0-9A-F]{2})|[^A-Za-z0-9\-._~!$&\'()*+,;=:@\/%\x80-\xFF]/', 'awstatium_pct', $s);
+    // Bytes that are not valid UTF-8 are encoded as well, so every key can be stored
+    if (!preg_match('//u', $s)) $s = preg_replace_callback('/[\x80-\xFF]/', 'awstatium_pct', $s);
+    return $s;
+}
+
+/** Canonical path without query string or fragment. Case is kept. */
 function awstatium_norm_path($u) {
     $u = (string) $u;
-    $cut = strcspn($u, '?#');
-    return rawurldecode(substr($u, 0, $cut));
+    return awstatium_canon(substr($u, 0, strcspn($u, '?#')));
 }
 
 /** Lookup key of a path: no trailing slash, except the root "/". */
@@ -187,8 +243,8 @@ function awstatium_key($path) {
 function awstatium_site_prefix() {
     static $p = null;
     if ($p === null) {
-        $site = untrailingslashit((string) wp_parse_url(site_url(), PHP_URL_PATH));
-        $home = untrailingslashit((string) wp_parse_url(home_url(), PHP_URL_PATH));
+        $site = awstatium_canon(untrailingslashit((string) wp_parse_url(site_url(), PHP_URL_PATH)));
+        $home = awstatium_canon(untrailingslashit((string) wp_parse_url(home_url(), PHP_URL_PATH)));
         $p    = ($site !== '' && $site !== $home && ($home === '' || strpos($site, $home . '/') === 0)) ? [$site, $home] : [];
     }
     return $p;
@@ -206,7 +262,7 @@ function awstatium_unprefix($u) {
  */
 function awstatium_page_key($raw) {
     $u = awstatium_unprefix(awstatium_norm_path($raw));
-    if ($u === '' || $u[0] !== '/' || !awstatium_utf8($u)) return '';
+    if ($u === '' || $u[0] !== '/') return '';
     $k = awstatium_key($u);
     if (preg_match(AWSTATIUM_SKIP, $k)) return '';
     $last = substr($k, strrpos($k, '/') + 1);
@@ -215,35 +271,31 @@ function awstatium_page_key($raw) {
 }
 
 /**
- * Key from user input (root-relative path or full URL). Empty if unusable.
+ * Key from user input (root-relative path, full URL or a stored key). Empty if unusable.
  * This is also the sanitiser for paths: percent-encoded letters must survive, which sanitize_text_field() would strip.
  */
 function awstatium_input_path($s) {
-    $s = trim(preg_replace('/[\x00-\x1F\x7F<>"\']/', '', wp_strip_all_tags((string) $s)));
+    $s = trim(preg_replace('/[\x00-\x1F\x7F]/', '', wp_strip_all_tags((string) $s)));
     if ($s === '') return '';
     if (strpos($s, '://') !== false) $s = (string) wp_parse_url($s, PHP_URL_PATH);
     if ($s === '' || $s[0] !== '/') $s = '/' . $s;
     $s = awstatium_norm_path($s);
-    return ($s !== '' && awstatium_utf8($s)) ? awstatium_key($s) : '';
+    return $s !== '' ? awstatium_key($s) : '';
 }
 
-/** Full URL of a root-relative path on this site's scheme, host and port (not appended to a home subdirectory). */
+/** Full URL of a root-relative key on this site's scheme, host and port (not appended to a home subdirectory). */
 function awstatium_path_url($key) {
-    $h   = wp_parse_url(home_url());
-    $url = ($h['scheme'] ?? 'https') . '://' . ($h['host'] ?? '') . (isset($h['port']) ? ':' . $h['port'] : '');
+    $h    = wp_parse_url(home_url());
+    $url  = ($h['scheme'] ?? 'https') . '://' . ($h['host'] ?? '') . (isset($h['port']) ? ':' . $h['port'] : '');
     $last = substr($key, strrpos($key, '/') + 1);
     if ($key !== '/' && strpos($last, '.') === false && substr((string) get_option('permalink_structure'), -1) === '/') $key .= '/';
-    return $url . $key;
+    // Keys keep reserved characters encoded; UTF-8 letters are encoded here so the URL is plain ASCII
+    return $url . preg_replace_callback('/[\x80-\xFF]/', 'awstatium_pct', $key);
 }
 
 /** Key of the home page, e.g. "/" or "/blog". */
 function awstatium_home_key() {
-    return awstatium_key((string) wp_parse_url(home_url('/'), PHP_URL_PATH));
-}
-
-/** Invalid UTF-8 (e.g. Windows-1250 encoded URLs) cannot be saved in the database, so such entries are skipped. */
-function awstatium_utf8($s) {
-    return preg_match('//u', $s) === 1;
+    return awstatium_key(awstatium_canon((string) wp_parse_url(home_url('/'), PHP_URL_PATH)));
 }
 
 /* ---------- Parsing ---------- */
@@ -283,8 +335,10 @@ function awstatium_parse_file($file) {
                 break;
             case 'DOWNLOADS': // URL Hits 206Hits BW
                 if (count($f) < 2 || $f[0] === '' || $f[0][0] !== '/') break;
-                $k = rawurldecode(basename(awstatium_norm_path($f[0])));
-                if ($k === '' || !awstatium_utf8($k)) break;
+                // File name taken from the encoded path and brought to the canonical form once
+                $raw = substr($f[0], 0, strcspn($f[0], '?#'));
+                $k   = awstatium_canon(substr($raw, strrpos($raw, '/') + 1));
+                if ($k === '') break;
                 $r['d'][$k] = ($r['d'][$k] ?? 0) + (int) $f[1];
                 break;
         }
@@ -329,26 +383,32 @@ function awstatium_parse_source(array $s, array $months, $force) {
 
 /* ---------- Stored data ---------- */
 
-/** Saved monthly data of the current source (no file access). Data of another source is ignored. false = forget the copy in memory. */
+function awstatium_active() {
+    return (string) get_option(AWSTATIUM_OPT_ACTIVE, '');
+}
+
+/** Monthly data of the active snapshot (no file access). false = forget the copy in memory. */
 function awstatium_data($fresh = null) {
     static $data = null;
     if ($fresh === false) return $data = null;
     if ($fresh !== null) return $data = $fresh;
     if ($data === null) {
-        $v    = get_option(AWSTATIUM_OPT_DATA);
-        $data = (is_array($v) && ($v['src'] ?? '') === awstatium_source_id(awstatium_settings()) && is_array($v['months'] ?? null)) ? $v['months'] : [];
+        $src  = awstatium_active();
+        $v    = $src !== '' ? get_option(awstatium_opt('data', $src)) : null;
+        $data = (is_array($v) && ($v['src'] ?? '') === $src && is_array($v['months'] ?? null)) ? $v['months'] : [];
     }
     return $data;
 }
 
-/** Sum of views and downloads over all months of the current source. false = forget the copy in memory. */
+/** Sum of views and downloads of the active snapshot. false = forget the copy in memory. */
 function awstatium_totals($fresh = null) {
     static $t = null;
     if ($fresh === false) return $t = null;
     if ($fresh !== null) return $t = $fresh;
     if ($t === null) {
-        $v = get_option(AWSTATIUM_OPT_TOTALS);
-        $t = (is_array($v) && ($v['src'] ?? '') === awstatium_source_id(awstatium_settings())) ? $v : ['p' => [], 'd' => []];
+        $src = awstatium_active();
+        $v   = $src !== '' ? get_option(awstatium_opt('totals', $src)) : null;
+        $t   = (is_array($v) && ($v['src'] ?? '') === $src) ? $v : ['p' => [], 'd' => []];
     }
     return $t;
 }
@@ -371,23 +431,41 @@ function awstatium_save($key, $value) {
 }
 
 /**
- * Saves months and totals of a source. Monthly data is saved first; if that fails, the totals are not
- * published either, so the admin and the front end always show the same data. The in-memory copies only
- * ever hold saved data. Returns [ok, totals changed].
+ * Updates the active source with new months. Monthly data is saved first; if that fails, the totals are
+ * not published either. The in-memory copies only ever hold saved data. Returns [ok, totals changed].
  */
 function awstatium_store($src, array $months, $changed) {
     $totals = awstatium_sum($months, $src);
     // Totals are checked even without changes, so a failed earlier save is retried
-    $stale = get_option(AWSTATIUM_OPT_TOTALS) !== $totals;
+    $stale = get_option(awstatium_opt('totals', $src)) !== $totals;
     if ($changed) {
-        if (!awstatium_save(AWSTATIUM_OPT_DATA, ['src' => $src, 'months' => $months])) return [false, false];
+        if (!awstatium_save(awstatium_opt('data', $src), ['src' => $src, 'months' => $months])) return [false, false];
         awstatium_data($months);
     }
     if ($stale) {
-        if (!awstatium_save(AWSTATIUM_OPT_TOTALS, $totals)) return [false, false];
+        if (!awstatium_save(awstatium_opt('totals', $src), $totals)) return [false, false];
         awstatium_totals($totals);
     }
     return [true, $stale];
+}
+
+/**
+ * Makes a new source active: its data and totals are saved first, then the "active" pointer is switched
+ * and the previous snapshot removed. Until the pointer moves, the previous numbers stay visible.
+ */
+function awstatium_switch($src, array $months) {
+    $totals = awstatium_sum($months, $src);
+    if (!awstatium_save(awstatium_opt('data', $src), ['src' => $src, 'months' => $months])) return false;
+    if (!awstatium_save(awstatium_opt('totals', $src), $totals)) return false;
+    $old = (string) awstatium_option_fresh(AWSTATIUM_OPT_ACTIVE);
+    if (!awstatium_save(AWSTATIUM_OPT_ACTIVE, $src)) return false;
+    if ($old !== '' && $old !== $src) {
+        delete_option(awstatium_opt('data', $old));
+        delete_option(awstatium_opt('totals', $old));
+    }
+    awstatium_data($months);
+    awstatium_totals($totals);
+    return true;
 }
 
 /** After new counts are published: purge page caches first (fast), then sync the admin column in batches. */
@@ -396,8 +474,14 @@ function awstatium_after_publish() {
     awstatium_schedule_sync();
 }
 
+/** A failed save is retried in a few minutes (and by the hourly refresh anyway). */
+function awstatium_schedule_retry() {
+    if (!wp_next_scheduled('awstatium_refresh_now')) wp_schedule_single_event(time() + 300, 'awstatium_refresh_now');
+}
+
 /**
- * Parses changed AWStats files of the current source (usually only the current month) and publishes the result.
+ * Parses changed AWStats files of the configured source (usually only the current month) and publishes them.
+ * If the configured source is not the active one yet, it is parsed completely and switched to.
  * $force = parse every file regardless of its modification time. A bad file never removes a month's good data.
  * Returns 'ok' (saved), 'none' (no changes), 'partial' (some files skipped), 'error' (saving failed)
  * or 'busy' (another refresh or a change of the data source is running).
@@ -407,17 +491,32 @@ function awstatium_rebuild($force = false) {
     try {
         $s      = awstatium_settings_fresh();
         $src    = awstatium_source_id($s);
-        $stored = get_option(AWSTATIUM_OPT_DATA);
-        // Stored data of another source is never merged: start over for this one
-        $months = (is_array($stored) && ($stored['src'] ?? '') === $src && is_array($stored['months'] ?? null)) ? $stored['months'] : [];
-        [$months, $changed, $bad] = awstatium_parse_source($s, $months, $force || !$months);
+        $active = (string) awstatium_option_fresh(AWSTATIUM_OPT_ACTIVE);
+        if ($src === $active) {
+            $stored = get_option(awstatium_opt('data', $src));
+            $months = (is_array($stored) && ($stored['src'] ?? '') === $src && is_array($stored['months'] ?? null)) ? $stored['months'] : [];
+            [$months, $changed, $bad] = awstatium_parse_source($s, $months, $force || !$months);
+        } else {
+            // Another source is configured: build it completely, never on top of the active one
+            [$months, $changed, $bad] = awstatium_parse_source($s, [], true);
+        }
         // The data source changed while we were parsing: do not write data of the old one
         if (awstatium_source_id(awstatium_settings_fresh()) !== $src) return 'busy';
-        [$ok, $published] = awstatium_store($src, $months, $changed);
+        if ($src === $active) {
+            [$ok, $published] = awstatium_store($src, $months, $changed);
+        } elseif ($months) {
+            $ok = $published = awstatium_switch($src, $months);
+        } else {
+            $ok = true; // nothing usable in the configured source: the previous numbers stay
+            $published = false;
+        }
     } finally {
         awstatium_unlock();
     }
-    if (!$ok) return 'error';
+    if (!$ok) {
+        awstatium_schedule_retry();
+        return 'error';
+    }
     if ($published) awstatium_after_publish();
     if ($bad) return 'partial';
     return $changed || $published ? 'ok' : 'none';
@@ -439,12 +538,15 @@ function awstatium_publish_source(array $s, $months = null) {
         if (awstatium_source_id(awstatium_settings_fresh()) !== $src) return 'busy';
         $bad = 0;
         if ($months === null) [$months, , $bad] = awstatium_parse_source($s, [], true);
-        [$ok, $published] = awstatium_store($src, $months, true);
+        $ok = $months && awstatium_switch($src, $months);
     } finally {
         awstatium_unlock();
     }
-    if (!$ok) return 'error';
-    if ($published) awstatium_after_publish();
+    if (!$ok) {
+        awstatium_schedule_retry();
+        return 'error';
+    }
+    awstatium_after_publish();
     return $bad ? 'partial' : 'ok';
 }
 
@@ -545,10 +647,16 @@ function awstatium_post_paths($post = null) {
     if (!$url) return [];
     $path  = (string) wp_parse_url($url, PHP_URL_PATH);
     $paths = [$path];
-    // Old slugs (WordPress keeps them for non-hierarchical types when a slug changes)
-    if (basename(untrailingslashit($path)) === $post->post_name) {
+    // Old slugs (WordPress keeps them for non-hierarchical types when a slug changes). The slug is replaced
+    // in the last path segment, keeping a suffix such as .html and the trailing slash.
+    $base = untrailingslashit($path);
+    $last = basename($base);
+    $name = (string) $post->post_name;
+    if ($name !== '' && ($last === $name || strpos($last, $name . '.') === 0)) {
+        $dir    = trailingslashit(dirname($base));
+        $suffix = substr($last, strlen($name)) . (substr($path, -1) === '/' ? '/' : '');
         foreach ((array) get_post_meta($post->ID, '_wp_old_slug') as $old) {
-            if ($old !== '' && $old !== $post->post_name) $paths[] = trailingslashit(dirname(untrailingslashit($path))) . $old;
+            if ($old !== '' && $old !== $name) $paths[] = $dir . $old . $suffix;
         }
     }
     foreach (preg_split('/\R/', (string) get_post_meta($post->ID, AWSTATIUM_META_OLD, true)) as $line) {
@@ -589,7 +697,10 @@ function awstatium_get_downloads($match) {
     $match = (string) $match;
     if ($match === '') return 0;
     $s = 0;
-    foreach (awstatium_totals()['d'] as $f => $n) if (stripos((string) $f, $match) !== false) $s += $n;
+    foreach (awstatium_totals()['d'] as $f => $n) {
+        // Compared with the real file name: the canonical key decoded once (%20 is a space, %2520 a literal "%20")
+        if (stripos(rawurldecode((string) $f), $match) !== false) $s += $n;
+    }
     return $s;
 }
 

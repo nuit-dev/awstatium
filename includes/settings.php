@@ -87,7 +87,7 @@ function awstatium_settings_changed($old, $new) {
         $months  = ($pending && $pending['src'] === awstatium_source_id($new)) ? $pending['months'] : null;
         $status  = awstatium_publish_source($new, $months);
         if ($status === 'busy') add_settings_error(AWSTATIUM_OPT_SETTINGS, 'busy', __('Another refresh is running. The new data will be loaded in the background in a minute.', 'awstatium'), 'warning');
-        if ($status === 'error') add_settings_error(AWSTATIUM_OPT_SETTINGS, 'error', __('Saving to the database failed, the last saved data is shown. Details are in the PHP error log.', 'awstatium'));
+        if ($status === 'error') add_settings_error(AWSTATIUM_OPT_SETTINGS, 'error', __('The new data source could not be saved yet. The previous data is still shown and saving will be retried in a few minutes. Details are in the PHP error log.', 'awstatium'));
         return;
     }
     if ($old['auto_display'] !== $new['auto_display'] || $old['position'] !== $new['position']) awstatium_purge_caches();
@@ -148,6 +148,9 @@ function awstatium_settings_page() {
     $row(__('AWStats files found', 'awstatium'), $files
         ? esc_html(number_format_i18n(count($files)))
         : '<strong style="color:#b32d2e">' . esc_html__('None – check the directory and config below.', 'awstatium') . '</strong>');
+    if ($data && awstatium_active() !== awstatium_source_id($s)) {
+        $row(__('Shown data', 'awstatium'), '<strong>' . esc_html__('The data of the previous source is shown until the new one is loaded.', 'awstatium') . '</strong>');
+    }
     $row(__('Months loaded', 'awstatium'), esc_html(number_format_i18n(count($data)))
         . (!$data && wp_next_scheduled('awstatium_refresh_now') ? ' – ' . esc_html__('Data is being loaded in the background. Reload this page in a minute.', 'awstatium') : ''));
     $row(__('Last AWStats update', 'awstatium'), esc_html($last !== '' ? awstatium_dt($last) : '–') . ' ' . awstatium_refresh_form('settings'));
